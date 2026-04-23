@@ -1,4 +1,4 @@
-# ☕ OGD WinCaffè 8.0.10
+# ☕ OGD WinCaffe NEXT 8.0.10
 
 > **Creato da un Nerd Gamer, per altri Nerd Gamers** ❤️
 
@@ -9,9 +9,9 @@
 
 ---
 
-## 🌌 Cos'è OGD WinCaffè
+## 🌌 Cos'è OGD WinCaffe NEXT
 
-**OGD WinCaffè** è uno script PowerShell di ottimizzazione, manutenzione, diagnostica e riparazione pensato soprattutto per il gaming su Windows.
+**OGD WinCaffe NEXT** è uno script PowerShell di ottimizzazione, manutenzione, diagnostica e riparazione pensato soprattutto per il gaming su Windows.
 
 L'obiettivo del progetto non è “spingere tutto al massimo a caso”, ma **migliorare il sistema in modo ragionato**, offrendo:
 
@@ -142,6 +142,24 @@ Questo non significa “forzare magia IA”, ma offrire:
 
 ---
 
+## ⚠️ Stato attuale tweak AMD
+
+I rami **AMD GPU** e **AMD CPU** sono presenti nel progetto, ma al momento non sono ancora supportati in modo pieno.
+
+La ragione è semplice:
+- attualmente non c'è ancora hardware AMD reale disponibile per test diretti e validazione seria sul campo,
+- quindi questi tweak vengono forniti **così come sono**,
+- senza supporto ufficiale,
+- e con utilizzo **a rischio dell'utente** fino a futura validazione pratica.
+
+In breve:
+- possono essere utili come base lato Windows,
+- ma non vanno considerati al livello di affidabilità dei rami testati su hardware realmente disponibile.
+
+Quando sarà disponibile hardware AMD da testare, questa parte del progetto verrà rivista e supportata in modo più completo.
+
+---
+
 ## ♿ Accessibilità: OpenDyslexic
 
 Lo script include un gestore dedicato per **OpenDyslexic**, trattato come funzione di **accessibilità opzionale**.
@@ -159,7 +177,7 @@ Il manager permette di:
 
 ## 🌐 Nota DNS: nuova filosofia del progetto
 
-A partire da questo ramo, **WinCaffè non imposta più DNS personalizzati** come parte normale dei preset o dei menu di rete.
+A partire da questo ramo, **WinCaffe NEXT non imposta più DNS personalizzati** come parte normale dei preset o dei menu di rete.
 
 La scelta è voluta:
 - i **DNS** da oggi vengono lasciati **all’utente**,
@@ -248,7 +266,7 @@ A tutti loro va un grazie sincero. Davvero. 🙏
 
 ## ❤️ Conclusione
 
-**OGD WinCaffè 8.0.10** non vuole essere solo uno “script che cambia valori”, ma un banco di lavoro per chi vuole:
+**OGD WinCaffe NEXT 8.0.10** non vuole essere solo uno “script che cambia valori”, ma un banco di lavoro per chi vuole:
 
 - ottimizzare,
 - capire,
@@ -266,4 +284,3 @@ Per una release ordinata, è consigliato distribuire insieme:
 - `OGD_WinCaffe_8.0.10.ps1`
 - `readme-gpt.txt`
 - `README.md`
-
