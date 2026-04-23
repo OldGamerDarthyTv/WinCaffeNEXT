@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 <#
 ═══════════════════════════════════════════════════════════════════════════════
-⚡ OGD WinCaffè v8.0.10 ⚡
+OGD WinCaffe NEXT v8.0.10
 
  Sistema Definitivo di Ottimizzazione Windows 11 per Gaming
 
@@ -11,13 +11,13 @@
  │ OGD Team - Original Gaming Design                           │
  └─────────────────────────────────────────────────────────────┘
 
-NOVITÀ v8.0.10:
-   🛠️ Bootstrap HF4 ricostruito: script di nuovo autosufficiente
-   🧠 NPU rilevamento robusto — 3 metodi in cascata
-   🔍 Fallback CPU-based Intel Core Ultra / AMD Ryzen AI / Snapdragon X
-   💻 Selezione PC Type robusta (Desktop / Laptop / Laptop Gaming)
-🐛 Fix 8.0.10: pulizia gestione DNS, reset DNS automatici di default, menu FIX PRE 8.0.10
-ℹ️  Nota versione: 8.0.10 e una release provvisoria di fix/transizione al posto di 8.1.0; questa logica potrebbe continuare anche nelle prossime release se utile.
+NOVITA v8.0.10:
+   Bootstrap HF4 ricostruito: script di nuovo autosufficiente
+   NPU rilevamento robusto - 3 metodi in cascata
+   Fallback CPU-based Intel Core Ultra / AMD Ryzen AI / Snapdragon X
+   Selezione PC Type robusta (Desktop / Laptop / Laptop Gaming)
+Fix 8.0.10: pulizia gestione DNS, reset DNS automatici di default, menu FIX PRE 8.0.10
+Nota versione: 8.0.10 e una release provvisoria di fix/transizione al posto di 8.1.0; questa logica potrebbe continuare anche nelle prossime release se utile.
 
  OGD PRESET:
    Questa variante personale è stata testata sul mio PC con RTX 5080,
@@ -26,6 +26,11 @@ NOVITÀ v8.0.10:
    calibrata sul mio hardware e sulle mie preferenze.
    Se su altri PC crea problemi, instabilità o risultati diversi dal previsto,
    io non c'entro: non è un preset universale e non è pensato come profilo safe per tutti.
+
+ OGD WINCAFFE NEXT:
+   Dalla versione 8.0.10 in poi il progetto prende il nome OGD WinCaffe NEXT.
+   Il target del ramo NEXT è migliorare tutto in modo progressivo:
+   struttura, chiarezza, compatibilita, diagnostica, preset e qualita generale del progetto.
 
  MENU DISPONIBILI:
    [1] LIGHT  [2] NORMALE  [3] AGGRESSIVO
@@ -59,7 +64,7 @@ $script:OgdRunningOnPwsh = ($PSVersionTable.PSEdition -eq 'Core')
 # Windows 11 check
 $os=Get-CimInstance Win32_OperatingSystem;$build=[int]$os.BuildNumber
 if($build -lt 22000){
-    Write-Host "`n  ℹ️  Build rilevata inferiore a Windows 11 (build 22000+) - Build: $build" -ForegroundColor Yellow
+    Write-Host "`n  [INFO] Build rilevata inferiore a Windows 11 (build 22000+) - Build: $build" -ForegroundColor Yellow
 }
 
 $script:OgdTargetWindowsFamily = ''
@@ -250,7 +255,7 @@ function Write-OgdSoftWarningOnce {
     if([string]::IsNullOrWhiteSpace($Key)){ return }
     if($script:OgdSoftWarnings.ContainsKey($Key)){ return }
     $script:OgdSoftWarnings[$Key] = $true
-    Write-Host "  ⚠ $Message" -ForegroundColor Yellow
+    Write-Host "  [WARN] $Message" -ForegroundColor Yellow
 }
 
 function Get-AppxProvisionedPackage {
@@ -453,55 +458,32 @@ function Show-OgdStartupIntro {
     if(-not $supportsAnimation){
         Clear-Host
         Write-Host ""
-        Write-Host "  O.G.D. // Cyber Boot Sequence" -ForegroundColor Green
+        Write-Host "  OGD WinCaffe NEXT" -ForegroundColor Green
+        Write-Host "  Bootstrap Matrix Console" -ForegroundColor DarkGreen
         Write-Host "  Versione runtime: $Version" -ForegroundColor Cyan
-        Write-Host "  Creato da un Nerd Gamer, per altri Nerd Gamers" -ForegroundColor White
+        Write-Host "  Console pronta: profili, hotfix e strumenti caricati" -ForegroundColor White
         Start-Sleep -Milliseconds 1200
         return
     }
 
     $startedAt = Get-Date
-    $durationSeconds = 9
+    $durationSeconds = 8
     $spinnerFrames = @('|','/','-','\')
-    $rainChars = '01OGDWINCAFFE<>[]{}#%&@'
-    $title = 'OGD WinCaffe // Performance Control Deck'
-    $versionLine = 'O.G.D. // CYBER CORE'
+    $rainChars = '010101OGDNEXTWINCAFFE[]{}<>#'
+    $title = 'OGD WinCaffe NEXT'
+    $versionLine = 'MATRIX BOOTSTRAP CONSOLE'
     $versionSubLine = "Versione runtime: $Version"
-    $tagline = 'Creato da un Nerd Gamer, per altri Nerd Gamers'
+    $tagline = 'Professional Gaming Optimization Suite'
     $phaseLines = @(
         'Boot console e controlli di sicurezza',
         'Caricamento moduli gaming, rete e sistema',
-        'Preparazione menu guidati, profili e hotfix',
-        'Init completata: pronto per il tuning del sistema'
-    )
-    $heartFrames = @(
-@'
-           ♥♥♥       ♥♥♥
-        ♥♥♥♥♥♥♥   ♥♥♥♥♥♥♥
-      ♥♥♥♥♥♥♥♥♥♥ ♥♥♥♥♥♥♥♥♥♥
-      ♥♥♥♥♥♥♥♥♥♥ ♥♥♥♥♥♥♥♥♥♥
-       ♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥
-         ♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥
-           ♥♥♥♥♥♥♥♥♥♥♥♥
-             ♥♥♥♥♥♥♥♥♥♥
-               ♥♥♥♥♥♥♥
-                 ♥♥♥
-'@,
-@'
-             ♥♥♥   ♥♥♥
-          ♥♥♥♥♥♥♥ ♥♥♥♥♥♥♥
-        ♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥
-        ♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥
-         ♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥
-           ♥♥♥♥♥♥♥♥♥♥♥♥♥♥
-             ♥♥♥♥♥♥♥♥♥♥♥♥
-               ♥♥♥♥♥♥♥♥♥
-                 ♥♥♥♥♥
-'@
+        'Inizializzazione profili, hotfix e diagnostica',
+        'Finalizzazione interfaccia e controlli runtime'
     )
     $lines = New-Object System.Collections.Generic.List[string]
-    $lines.Add("  $title")
-    $lines.Add("  $versionLine")
+    $lines.Add("  +=================================================================+")
+    $lines.Add("  |                      OGD MATRIX BOOTSTRAP                       |")
+    $lines.Add("  +=================================================================+")
     $lines.Add("")
     $lines.Add("  Caricamento console Matrix... premi INVIO per saltare")
     $lines.Add("")
@@ -515,15 +497,16 @@ function Show-OgdStartupIntro {
     $lines.Add("  ")
     $versionStart = $lines.Count
     $lines.Add("  ")
+    $versionSubStart = $lines.Count
+    $lines.Add("  ")
     $taglineStart = $lines.Count
     $lines.Add("  ")
-    $heartStart = $lines.Count
-
-    foreach($hl in ($heartFrames[0] -split "`n")){
-        if($hl -ne ''){
-            $lines.Add("  $hl")
-        }
-    }
+    $rainStart = $lines.Count
+    $lines.Add("  ")
+    $lines.Add("  ")
+    $lines.Add("  ")
+    $lines.Add("  ")
+    $lines.Add("  ")
 
     Clear-Host
     foreach($line in $lines){ Write-Host $line }
@@ -559,6 +542,7 @@ function Show-OgdStartupIntro {
 
     $titleReveal = ''
     $versionReveal = ''
+    $versionSubReveal = ''
     $taglineReveal = ''
     $tick = 0
     $skip = $false
@@ -575,21 +559,23 @@ function Show-OgdStartupIntro {
         if($titleReveal.Length -ge $title.Length -and $versionReveal.Length -lt $versionLine.Length){
             $versionReveal += $versionLine[$versionReveal.Length]
         }
-        if($versionReveal.Length -ge $versionLine.Length -and $taglineReveal.Length -lt $tagline.Length){
+        if($versionReveal.Length -ge $versionLine.Length -and $versionSubReveal.Length -lt $versionSubLine.Length){
+            $versionSubReveal += $versionSubLine[$versionSubReveal.Length]
+        }
+        if($versionSubReveal.Length -ge $versionSubLine.Length -and $taglineReveal.Length -lt $tagline.Length){
             $taglineReveal += $tagline[$taglineReveal.Length]
         }
 
-        $rainLen = 40
+        $rainLen = 56
         $chars = for($i=0;$i -lt $rainLen;$i++){
             $rainChars[(Get-Random -Minimum 0 -Maximum $rainChars.Length)]
         }
         $rain = -join $chars
         $spinner = $spinnerFrames[$tick % $spinnerFrames.Count]
-        $heartFrame = $heartFrames[$tick % $heartFrames.Count]
         $progress = [Math]::Min([Math]::Max((((Get-Date) - $startedAt).TotalSeconds / $durationSeconds),0),1)
         $phaseIndex = [Math]::Min([int]($progress * $phaseLines.Count), $phaseLines.Count - 1)
-        $filled = [Math]::Min([int]($progress * 22), 22)
-        $bar = ('#' * $filled).PadRight(22,'.')
+        $filled = [Math]::Min([int]($progress * 32), 32)
+        $bar = ('#' * $filled).PadRight(32,'-')
         $tip = switch($phaseIndex){
             0 { 'Suggerimento: [2] NORMALE e il profilo piu equilibrato per la maggior parte dei PC.' }
             1 { 'Suggerimento: [H] HOTFIX e utile per DX9 legacy, accessibilita e diagnostica NPU.' }
@@ -597,40 +583,43 @@ function Show-OgdStartupIntro {
             default { 'Suggerimento: [8] INFO riepiloga cosa cambia davvero prima di applicare i tweak.' }
         }
 
-        Write-AtLine 0 ("  {0}  {1}" -f $spinner, $rain.Substring(0,[Math]::Min($rain.Length, [Math]::Max(10, [Math]::Min(60,$rain.Length)))))
-        Write-AtLine $phaseStart ("  Stato: " + $phaseLines[$phaseIndex]) DarkCyan
-        Write-AtLine $progressStart ("  [" + $bar + "] " + [int]($progress * 100) + "%") Yellow
+        Write-AtLine 0 ("  +=================================================================+") DarkGreen
+        Write-AtLine 1 ("  |  {0,-1}  {1,-57}|" -f $spinner, $rain.Substring(0,[Math]::Min($rain.Length,57))) Green
+        Write-AtLine 2 ("  +=================================================================+") DarkGreen
+        Write-AtLine $phaseStart ("  Stato operativo : " + $phaseLines[$phaseIndex]) DarkCyan
+        Write-AtLine $progressStart ("  Caricamento     : [" + $bar + "] " + ([int]($progress * 100)).ToString().PadLeft(3) + "%") Yellow
         Write-AtLine $tipStart ("  " + $tip) DarkGray
         Write-AtLine $titleStart ("  $titleReveal") Cyan
         Write-AtLine $versionStart ("  $versionReveal") Green
+        Write-AtLine $versionSubStart ("  $versionSubReveal") DarkGreen
         Write-AtLine $taglineStart ("  $taglineReveal") White
-
-        $heartLines = @($heartFrame -split "`n" | Where-Object { $_ -ne '' })
-        for($i=0; $i -lt $heartLines.Count; $i++){
-            Write-AtLine ($heartStart + $i) ("  " + $heartLines[$i]) Red
+        for($i=0; $i -lt 5; $i++){
+            $rowChars = for($j=0; $j -lt 56; $j++){
+                $rainChars[(Get-Random -Minimum 0 -Maximum $rainChars.Length)]
+            }
+            Write-AtLine ($rainStart + $i) ("  " + (-join $rowChars)) DarkGreen
         }
 
-        Start-Sleep -Milliseconds 130
+        Start-Sleep -Milliseconds 120
         $tick++
     }
 
     Clear-Host
     Write-Host ""
-    Write-Host "  OGD WinCaffè" -ForegroundColor Cyan
-    Write-Host "  Versione: $Version" -ForegroundColor Green
-    Write-Host '  Creato da un Nerd Gamer, per altri Nerd Gamers <3' -ForegroundColor White
-    Write-Host '  Console pronta: profili guidati, hotfix e strumenti avanzati caricati.' -ForegroundColor DarkCyan
+    Write-Host "  +=================================================================+" -ForegroundColor DarkGreen
+    Write-Host "  |                        OGD WinCaffe NEXT                        |" -ForegroundColor Green
+    Write-Host "  |                    Matrix bootstrap completato                  |" -ForegroundColor Green
+    Write-Host "  +=================================================================+" -ForegroundColor DarkGreen
     Write-Host ""
-    foreach($line in ($heartFrames[1] -split "`n")){
-        if($line -ne ''){
-            Write-Host ("  " + $line) -ForegroundColor Red
-        }
-    }
+    Write-Host "  Versione: $Version" -ForegroundColor Cyan
+    Write-Host '  Console pronta: profili guidati, hotfix e strumenti avanzati caricati.' -ForegroundColor White
+    Write-Host ""
     if($skip){
-        Write-Host "`n  Intro saltata su richiesta. Benvenuto!`n" -ForegroundColor DarkGray
+        Write-Host "  Intro saltata su richiesta." -ForegroundColor DarkGray
     } else {
-        Write-Host "`n  Benvenuto in OGD WinCaffè.`n" -ForegroundColor DarkGray
+        Write-Host "  Bootstrap completato con successo." -ForegroundColor DarkGray
     }
+    Write-Host ""
     Write-Host "  Scelta rapida: [2] desktop bilanciato | [4] laptop | [H] hotfix mirati | [8] spiegazioni" -ForegroundColor Yellow
     Start-Sleep -Milliseconds 900
 }
@@ -644,19 +633,19 @@ Show-OgdStartupIntro -Version '8.0.10'
 
 Clear-Host
 Write-Host "`n  ╔═══════════════════════════════════════════════════════╗" -F Cyan
-Write-Host "  ║      OGD WinCaffè v8.0.10 - DISCLAIMER & CREDITI      ║" -F Cyan
+Write-Host "  ║    OGD WinCaffe NEXT v8.0.10 - DISCLAIMER & CREDITI   ║" -F Cyan
 Write-Host "  ╚═══════════════════════════════════════════════════════╝`n" -F Cyan
 
-Write-Host "  📜 INFORMAZIONI IMPORTANTI:`n" -F Yellow
+Write-Host "  INFORMAZIONI IMPORTANTI:`n" -F Yellow
 
 Write-Host "  Questo script è un progetto NO-PROFIT creato per aiutare" -F White
 Write-Host "  la comunità gaming ad ottimizzare Windows 11.`n" -F White
 
-Write-Host "  👨‍💻 AUTORE PRINCIPALE:" -F Cyan
+Write-Host "  AUTORE PRINCIPALE:" -F Cyan
 Write-Host "     OldGamerDarthy (#DarkPlayer84Tv Productions)" -F White
 Write-Host "     Sviluppo, integrazione, testing e manutenzione`n" -F DarkGray
 
-Write-Host "  🙏 RINGRAZIAMENTI PERSONALI:" -F Cyan
+Write-Host "  RINGRAZIAMENTI PERSONALI:" -F Cyan
 Write-Host "     • AlexsTrexx (Alex) ⭐ - Test versione embrionale" -F White
 Write-Host "       Primo a credere nel progetto e a provarlo sul campo" -F DarkGray
 Write-Host "     • Diego - Supporto, consigli e amicizia durante lo sviluppo" -F White
@@ -664,7 +653,7 @@ Write-Host "     • Tutti gli amici del server Discord OGD" -F White
 Write-Host "       Per consigli, idee e ispirazione continua" -F DarkGray
 Write-Host "     • Claude AI (Anthropic) - Assistenza nello sviluppo`n" -F DarkGray
 
-Write-Host "  📚 FONTI E CREDITI TECNICI:" -F Cyan
+Write-Host "  FONTI E CREDITI TECNICI:" -F Cyan
 Write-Host "     Questo script raccoglie e integra conoscenze pubbliche da:" -F White
 Write-Host "     • Speedguide.net — TCP Optimizer" -F White
 Write-Host "       Impostazioni TCP/IP gaming (RSC, CTCP, RTO, ACK, QoS)" -F DarkGray
@@ -686,7 +675,7 @@ Write-Host "       Tweaks CoD, DPC fix, hidden registry keys" -F DarkGray
 Write-Host "     • Autori driver e tool hardware (NVIDIA, AMD, Intel)" -F White
 Write-Host "       Per driver, pannelli di controllo, documentazione e best practice ufficiali`n" -F DarkGray
 
-Write-Host "  ℹ️  NOTA SUI CREDITI:" -F Yellow
+Write-Host "  NOTA SUI CREDITI:" -F Yellow
 Write-Host "     Questo script non ruba né copia nulla." -F White
 Write-Host "     Raccoglie tweaks e ottimizzazioni pubblicamente" -F White
 Write-Host "     disponibili e li rende accessibili a tutti." -F White
@@ -696,25 +685,25 @@ Write-Host "     che hanno reso possibile questo progetto community-driven." -F 
 Write-Host "     L'obiettivo è diffondere la conoscenza,`n" -F White
 Write-Host "     non appropriarsene.`n" -F DarkGray
 
-Write-Host "  💬 COMMUNITY DISCORD:" -F Cyan
+Write-Host "  COMMUNITY DISCORD:" -F Cyan
 Write-Host "     https://discord.gg/5SJa2xp5`n" -F Yellow
 
-Write-Host "  ⚠️  RESPONSABILITÀ:" -F Yellow
+Write-Host "  RESPONSABILITA:" -F Yellow
 Write-Host "     • Questo script modifica il registro di sistema" -F White
 Write-Host "     • Viene creato un punto di ripristino automatico" -F White
 Write-Host "     • L'autore non è responsabile per eventuali problemi" -F White
 Write-Host "     • Usare a proprio rischio e responsabilità`n" -F White
 
-Write-Host "  ✅ GARANZIE:" -F Green
+Write-Host "  GARANZIE:" -F Green
 Write-Host "     • Codice testato su Windows 11 (build 22000+)" -F White
 Write-Host "     • Punto ripristino Windows creato prima di ogni modifica" -F White
 Write-Host "     • Ripristinabile da Impostazioni → Ripristino sistema`n" -F White
-Write-Host "  📄 LICENZA:" -F Cyan
+Write-Host "  LICENZA:" -F Cyan
 Write-Host "     GNU GPL v3.0 - vedere file LICENSE nel progetto/repo ufficiale`n" -F White
 
 Write-Host "  ════════════════════════════════════════════════════════`n" -F Cyan
 
-Write-Host "  💬 COMMUNITY & SUPPORTO:" -F Cyan
+Write-Host "  COMMUNITY & SUPPORTO:" -F Cyan
 Write-Host "     Discord OGD: https://discord.gg/5SJa2xp5" -F White
 $discordChoice = Read-Host "  Vuoi aprire il server Discord? (S/N)"
 if($discordChoice -in @("S","s")){
@@ -825,10 +814,10 @@ function Compare-OgdVersions {
 function Get-OgdOfficialRepoMetadata {
     [pscustomobject]@{
         Owner   = 'OldGamerDarthyTv'
-        Repo    = 'Project-Wincaffe'
+        Repo    = 'WinCaffeNEXT'
         Branch  = 'main'
-        ApiRoot = 'https://api.github.com/repos/OldGamerDarthyTv/Project-Wincaffe'
-        HtmlRoot= 'https://github.com/OldGamerDarthyTv/Project-Wincaffe'
+        ApiRoot = 'https://api.github.com/repos/OldGamerDarthyTv/WinCaffeNEXT'
+        HtmlRoot= 'https://github.com/OldGamerDarthyTv/WinCaffeNEXT'
     }
 }
 
@@ -953,7 +942,7 @@ Invoke-OgdOfficialRepoUpdateCheck -CurrentVersion $currentVersion -InstalledScri
 
 if($false -and (Test-Path $installedScript)){
     $installedContent=Get-Content $installedScript -Raw
-    if($installedContent -match 'OGD WinCaffè v(\d+\.\d+\.\d+(?:(?:HF|HotFix)\d+)?)'){
+    if($installedContent -match 'OGD WinCaffe NEXT v(\d+\.\d+\.\d+(?:(?:HF|HotFix)\d+)?)'){
         $installedVersion=$Matches[1]
 
         if((Compare-OgdVersions -LeftVersion $currentVersion -RightVersion $installedVersion) -gt 0){
@@ -1001,8 +990,8 @@ if($false -and (Test-Path $installedScript)){
 # ═════════════════════════════════════════════════════════════════════════════
 
 Clear-Host
-Write-Host "`n  ⚡ CHECK DIPENDENZE .NET (rilevamento automatico versioni)`n" -F Cyan
-Write-Host "  🔍 Ricerca versioni disponibili su winget..." -F DarkGray
+Write-Host "`n  CHECK DIPENDENZE .NET (rilevamento automatico versioni)`n" -F Cyan
+Write-Host "  Ricerca versioni disponibili su winget..." -F DarkGray
 
 # ── DISCOVERY DINAMICA ──────────────────────────────────────────────────────
 # Una sola chiamata winget search per trovare le versioni stabili disponibili
@@ -1013,7 +1002,7 @@ try {
     foreach($line in $searchOut){
         if($line -match "Microsoft\.DotNet\.Runtime\.(\d+)\s"){
             $ver = $Matches[1]
-            if([int]$ver -ge 6 -and $ver -notin $dotnetVersions){
+            if([int]$ver -ge 6 -and [int]$ver -le 10 -and $ver -notin $dotnetVersions){
                 $dotnetVersions += $ver
             }
         }
@@ -1023,13 +1012,13 @@ try {
 
 if($dotnetVersions.Count -eq 0){
     Write-Host "  ⚠ Discovery fallita, uso versioni base note" -F Yellow
-    $dotnetVersions = @("6","7","8","9","10","11")
+    $dotnetVersions = @("6","7","8","9","10")
 }
 
 Write-Host "  ✓ Versioni stabili trovate: $($dotnetVersions -join ', ')" -F Green
 
 # ── UNA SOLA CHIAMATA winget list — poi tutto in memoria ────────────────────
-Write-Host "  🔍 Lettura pacchetti installati..." -F DarkGray
+Write-Host "  Lettura pacchetti installati..." -F DarkGray
 
 # winget list con timeout 90s per evitare freeze
 $wgListJob = Start-Job { winget list --accept-source-agreements 2>$null | Out-String }
@@ -1042,24 +1031,41 @@ $wingetListRaw = if($wgListDone){ Receive-Job $wgListJob }else{
 Remove-Job $wgListJob -Force -EA SilentlyContinue
 
 $previewTypes = @(
-    @{Label="Runtime Preview";  ID="Microsoft.DotNet.Runtime.Preview"},
-    @{Label="Desktop Preview";  ID="Microsoft.DotNet.DesktopRuntime.Preview"},
-    @{Label="SDK Preview";      ID="Microsoft.DotNet.SDK.Preview"}
+    @{Label="Runtime Preview"; ID="Microsoft.DotNet.Runtime.Preview"; Match='Microsoft\.DotNet\.Runtime\.Preview'},
+    @{Label="Desktop Preview"; ID="Microsoft.DotNet.DesktopRuntime.Preview"; Match='Microsoft\.DotNet\.DesktopRuntime\.Preview'},
+    @{Label="SDK Preview"; ID="Microsoft.DotNet.SDK.Preview"; Match='Microsoft\.DotNet\.SDK\.Preview'}
 )
 
+$vcRedistTypes = @(
+    @{Label="Visual C++ 2015-2022 x64"; ID="Microsoft.VCRedist.2015+.x64"; Match='Microsoft\.VCRedist\.2015\+\.x64'},
+    @{Label="Visual C++ 2015-2022 x86"; ID="Microsoft.VCRedist.2015+.x86"; Match='Microsoft\.VCRedist\.2015\+\.x86'},
+    @{Label="Visual C++ 2013 x64"; ID="Microsoft.VCRedist.2013.x64"; Match='Microsoft\.VCRedist\.2013\.x64'},
+    @{Label="Visual C++ 2013 x86"; ID="Microsoft.VCRedist.2013.x86"; Match='Microsoft\.VCRedist\.2013\.x86'},
+    @{Label="Visual C++ 2012 x64"; ID="Microsoft.VCRedist.2012.x64"; Match='Microsoft\.VCRedist\.2012\.x64'},
+    @{Label="Visual C++ 2012 x86"; ID="Microsoft.VCRedist.2012.x86"; Match='Microsoft\.VCRedist\.2012\.x86'},
+    @{Label="Visual C++ 2010 x64"; ID="Microsoft.VCRedist.2010.x64"; Match='Microsoft\.VCRedist\.2010\.x64'},
+    @{Label="Visual C++ 2010 x86"; ID="Microsoft.VCRedist.2010.x86"; Match='Microsoft\.VCRedist\.2010\.x86'}
+)
+
+$stableDotnetPackages = @()
+foreach($ver in $dotnetVersions){
+    $stableDotnetPackages += @(
+        @{Label="Runtime $ver"; ID="Microsoft.DotNet.Runtime.$ver"; Match="Microsoft\.DotNet\.Runtime\.$ver\s"},
+        @{Label="Desktop $ver"; ID="Microsoft.DotNet.DesktopRuntime.$ver"; Match="Microsoft\.DotNet\.DesktopRuntime\.$ver\s"},
+        @{Label="SDK $ver"; ID="Microsoft.DotNet.SDK.$ver"; Match="Microsoft\.DotNet\.SDK\.$ver\s"}
+    )
+}
+
+$dependencyCatalog = @($stableDotnetPackages + $previewTypes + $vcRedistTypes)
 $missingDotnet  = @()
 $installedDotnet = @()
 
-# Check versioni stabili — solo string match sul dump già in memoria
-foreach($ver in $dotnetVersions){
-    if($wingetListRaw -match "Microsoft\.DotNet\.Runtime\.$ver\s")       {$installedDotnet+="Runtime $ver"}   else{$missingDotnet+="Runtime $ver"}
-    if($wingetListRaw -match "Microsoft\.DotNet\.DesktopRuntime\.$ver\s"){$installedDotnet+="Desktop $ver"}   else{$missingDotnet+="Desktop $ver"}
-    if($wingetListRaw -match "Microsoft\.DotNet\.SDK\.$ver\s")           {$installedDotnet+="SDK $ver"}        else{$missingDotnet+="SDK $ver"}
-}
-
-# Check Preview — stesso dump
-foreach($pt in $previewTypes){
-    if($wingetListRaw -match [regex]::Escape($pt.ID)){$installedDotnet+=$pt.Label}else{$missingDotnet+=$pt.Label}
+foreach($pkg in $dependencyCatalog){
+    if($wingetListRaw -match $pkg.Match){
+        $installedDotnet += $pkg.Label
+    } else {
+        $missingDotnet += $pkg.Label
+    }
 }
 
 Write-Host "  ✓ Check completato`n" -F Green
@@ -1072,62 +1078,34 @@ if($missingDotnet.Count -gt 0){
     Write-Host "`n  Componenti mancanti:" -F Yellow
     foreach($m in $missingDotnet){ Write-Host "   • $m" -F Red }
 
-    Write-Host "`n  Consigliato: Installare tutte le versioni .NET`n" -F Cyan
+    Write-Host "`n  Consigliato: installare runtime, SDK, preview utili e Visual C++ mancanti`n" -F Cyan
 
-    if((Read-Host "  Installare componenti .NET mancanti? (S/N)") -in @("S","s")){
+    if((Read-Host "  Installare componenti mancanti? (S/N)") -in @("S","s")){
         Write-Host ""
-        # Versioni stabili
-        foreach($ver in $dotnetVersions){
-            if($missingDotnet -contains "Runtime $ver"){
-                Write-Host "  Installazione .NET $ver Runtime..." -F Cyan
-                winget install "Microsoft.DotNet.Runtime.$ver" --silent --accept-source-agreements --accept-package-agreements
-                if($LASTEXITCODE -eq 0){ Write-Host "  ✓ .NET $ver Runtime installato!" -F Green }
-            }
-            if($missingDotnet -contains "Desktop $ver"){
-                Write-Host "  Installazione .NET $ver Desktop Runtime..." -F Cyan
-                winget install "Microsoft.DotNet.DesktopRuntime.$ver" --silent --accept-source-agreements --accept-package-agreements
-                if($LASTEXITCODE -eq 0){ Write-Host "  ✓ .NET $ver Desktop Runtime installato!" -F Green }
-            }
-            if($missingDotnet -contains "SDK $ver"){
-                Write-Host "  Installazione .NET $ver SDK..." -F Cyan
-                winget install "Microsoft.DotNet.SDK.$ver" --silent --accept-source-agreements --accept-package-agreements
-                if($LASTEXITCODE -eq 0){ Write-Host "  ✓ .NET $ver SDK installato!" -F Green }
+        foreach($pkg in $dependencyCatalog){
+            if($missingDotnet -contains $pkg.Label){
+                Write-Host "  Installazione $($pkg.Label)..." -F Cyan
+                winget install $pkg.ID --silent --accept-source-agreements --accept-package-agreements
+                if($LASTEXITCODE -eq 0){ Write-Host "  ✓ $($pkg.Label) installato!" -F Green }
             }
         }
-        # Preview
-        foreach($pt in $previewTypes){
-            if($missingDotnet -contains $pt.Label){
-                Write-Host "  Installazione $($pt.Label)..." -F Cyan
-                winget install $pt.ID --silent --accept-source-agreements --accept-package-agreements
-                if($LASTEXITCODE -eq 0){ Write-Host "  ✓ $($pt.Label) installato!" -F Green }
-            }
-        }
-        Write-Host "`n  ✓ Installazione .NET completata!`n" -F Green
+        Write-Host "`n  ✓ Installazione dipendenze completata!`n" -F Green
         Start-Sleep 2
     }
 }else{
-    Write-Host "  ✓ Tutte le versioni .NET installate! ($($installedDotnet.Count) componenti)`n" -F Green
+    Write-Host "  ✓ Tutte le dipendenze controllate risultano presenti! ($($installedDotnet.Count) componenti)`n" -F Green
 
-    if((Read-Host "  Verificare aggiornamenti .NET? (S/N)") -in @("S","s")){
+    if((Read-Host "  Verificare aggiornamenti dipendenze? (S/N)") -in @("S","s")){
         Write-Host ""
         $upgCount = 0
-        foreach($ver in $dotnetVersions){
-            Write-Host "  Aggiornamento .NET $ver..." -F Cyan
-            $r1 = winget upgrade "Microsoft.DotNet.Runtime.$ver"        --silent --accept-source-agreements --accept-package-agreements 2>&1 | Out-String
-            $r2 = winget upgrade "Microsoft.DotNet.DesktopRuntime.$ver" --silent --accept-source-agreements --accept-package-agreements 2>&1 | Out-String
-            $r3 = winget upgrade "Microsoft.DotNet.SDK.$ver"            --silent --accept-source-agreements --accept-package-agreements 2>&1 | Out-String
-            # Controlla se almeno uno ha trovato aggiornamenti
-            $found = @($r1,$r2,$r3) | Where-Object { $_ -notmatch "non sono stati trovati|no applicable|no newer|already installed|non sono disponibili" }
-            if($found){ Write-Host "  ✓ .NET $ver aggiornato!" -F Green; $upgCount++ }
-            else       { Write-Host "  → .NET $ver già aggiornato" -F DarkGray }
-        }
-        foreach($pt in $previewTypes){
-            Write-Host "  Aggiornamento $($pt.Label)..." -F Cyan
-            $rp = winget upgrade $pt.ID --silent --accept-source-agreements --accept-package-agreements 2>&1 | Out-String
+        foreach($pkg in $dependencyCatalog){
+            Write-Host "  Aggiornamento $($pkg.Label)..." -F Cyan
+            $rp = winget upgrade $pkg.ID --silent --accept-source-agreements --accept-package-agreements 2>&1 | Out-String
             if($rp -notmatch "non sono stati trovati|no applicable|no newer|already installed|non sono disponibili"){
-                Write-Host "  ✓ $($pt.Label) aggiornato!" -F Green; $upgCount++
+                Write-Host "  ✓ $($pkg.Label) aggiornato!" -F Green
+                $upgCount++
             } else {
-                Write-Host "  → $($pt.Label) già aggiornato" -F DarkGray
+                Write-Host "  → $($pkg.Label) già aggiornato" -F DarkGray
             }
         }
         if($upgCount -eq 0){ Write-Host "`n  ✓ Tutto già aggiornato!`n" -F Green }
@@ -1171,21 +1149,21 @@ if($odChoice -in @('S','s')){
 
 Clear-Host
 Write-Host "`n  ╔═══════════════════════════════════════════════════════╗" -F Cyan
-Write-Host "  ║           OGD WinCaffè v8.0.10 - Installazione        ║" -F Cyan
+Write-Host "  ║         OGD WinCaffe NEXT v8.0.10 - Installazione     ║" -F Cyan
 Write-Host "  ╚═══════════════════════════════════════════════════════╝`n" -F Cyan
 
-Write-Host "  [1] ⚙️  INSTALLA - Aggiungi comando 'wincaffe' globale" -F Green
+Write-Host "  [1] INSTALLA - Aggiungi comando 'wincaffe' globale" -F Green
 Write-Host "      Copia script in C:\OGD\ + comando PowerShell" -F DarkGray
-Write-Host "`n  [2] ❌ DISINSTALLA - Rimuovi comando 'wincaffe'" -F Red
+Write-Host "`n  [2] DISINSTALLA - Rimuovi comando 'wincaffe'" -F Red
 Write-Host "      Pulisce tutto (script + profilo PowerShell)" -F DarkGray
-Write-Host "`n  [3] ▶️  ESEGUI - Avvia normalmente (senza installare)`n" -F Yellow
+Write-Host "`n  [3] ESEGUI - Avvia normalmente (senza installare)`n" -F Yellow
 
 $setupChoice=Read-Host "  Scelta (1/2/3)"
 
 if($setupChoice -eq "1"){
     # INSTALLAZIONE
     Clear-Host
-    Write-Host "`n  ⚙️  INSTALLAZIONE OGD WINCAFFÈ`n" -F Green
+    Write-Host "`n  INSTALLAZIONE OGD WINCAFFE NEXT`n" -F Green
     
     # Percorso installazione
     $installDir="C:\OGD"
@@ -1246,7 +1224,7 @@ function wincaffe {
         & $exe -NoProfile -ExecutionPolicy Bypass -File $sp
     }
 }
-Write-Host 'OGD WinCaffe pronto — usa: wincaffe' -ForegroundColor Cyan
+Write-Host 'OGD WinCaffe NEXT pronto - usa: wincaffe' -ForegroundColor Cyan
 # <<<OGD_WINCAFFE_END>>>
 '@
     # Sostituisci il placeholder con il percorso reale
@@ -1296,7 +1274,7 @@ Write-Host 'OGD WinCaffe pronto — usa: wincaffe' -ForegroundColor Cyan
 if($setupChoice -eq "2"){
     # DISINSTALLAZIONE
     Clear-Host
-    Write-Host "`n  ❌ DISINSTALLAZIONE OGD WINCAFFÈ`n" -F Red
+    Write-Host "`n  DISINSTALLAZIONE OGD WINCAFFE NEXT`n" -F Red
     
     if((Read-Host "  Confermi disinstallazione? (S/N)") -notin @("S","s")){exit}
     
@@ -1360,25 +1338,25 @@ function Show-Banner {
     Clear-Host
     Write-Host "`n  ╔═══════════════════════════════════════════════════════╗" -F Cyan
     Write-Host "  ║                                                       ║" -F Cyan
-    Write-Host "  ║     ▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄  ▄▄▄▄▄▄    ⚡                  ║" -F Yellow
+    Write-Host "  ║     ▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄  ▄▄▄▄▄▄                         ║" -F Yellow
     Write-Host "  ║    █       ██       ██      █                        ║" -F Yellow
-Write-Host "  ║    █   ▄   ██   ▄▄▄▄█  ▄    █     WinCaffè v8.0.10 ║" -F Yellow
+Write-Host "  ║    █   ▄   ██   ▄▄▄▄█  ▄    █  WinCaffe NEXT 8.0.10 ║" -F Yellow
     Write-Host "  ║    █  █ █  ██  █  ▄▄█ █ █   █  ULTIMATE              ║" -F Yellow
     Write-Host "  ║    █  █▄█  ██  █ █  █ █▄█   █                        ║" -F Yellow
-    Write-Host "  ║    █       ██  █▄▄█ █       █  ⚡                    ║" -F Yellow
+    Write-Host "  ║    █       ██  █▄▄█ █       █                        ║" -F Yellow
     Write-Host "  ║    █▄▄▄▄▄▄▄██▄▄▄▄▄▄▄█▄▄▄▄▄▄█                         ║" -F Yellow
     Write-Host "  ║                                                       ║" -F Cyan
     Write-Host "  ║           #DarkPlayer84Tv Productions                ║" -F Green
-    Write-Host "  ║         by OldGamerDarthy Official 🎮                ║" -F Green
+    Write-Host "  ║         by OldGamerDarthy Official                   ║" -F Green
     Write-Host "  ║                                                       ║" -F Cyan
     Write-Host "  ╚═══════════════════════════════════════════════════════╝" -F Cyan
     Write-Host "`n                      ( (                                " -F DarkGray
     Write-Host "                       ) )                                 " -F Gray
     Write-Host "                    .........                              " -F Yellow
-    Write-Host "                    |       |]  ☕                         " -F Yellow
+    Write-Host "                    |       |]                            " -F Yellow
     Write-Host "                    \       /                              " -F Yellow
     Write-Host "                 ~~~~~~~~~~~~~~`n                          " -F DarkYellow
-    Write-Host "      🎮 Ottimizzazione Gaming Windows by OGD 🎮" -F Cyan
+    Write-Host "      Ottimizzazione Gaming Windows by OGD" -F Cyan
     Write-Host "        Original Gaming Design - DarkPlayer84Tv" -F DarkGray
     Write-Host "        Target attivo: $(Get-OgdTargetLabel)" -F White
     Write-Host "        Scelta rapida: [2] bilanciato  [4] laptop  [H] hotfix  [8] info`n" -F Yellow
@@ -1387,59 +1365,84 @@ Write-Host "  ║    █   ▄   ██   ▄▄▄▄█  ▄    █     WinCaf
 function Show-Banner {
     Clear-Host
     Write-Host ""
-    Write-Host "  +--------------------------------------------------------------------+" -F Gray
-    Write-Host "  | OGD WINCAFFE 8.0.10 // CYBER GAMING WORKBENCH                    |" -F Black -BackgroundColor Gray
-    Write-Host "  +--------------------------------------------------------------------+" -F Gray
-    Write-Host "  | [Profiles] [Gaming] [Devices] [Repair] [Network] [Help]           |" -F Black -BackgroundColor White
-    Write-Host "  +--------------------------------------------------------------------+" -F Gray
-    Write-Host "  | STATUS : ONLINE                                                    |" -F Cyan
+    Write-Host "  +--------------------------------------------------------------------+" -F DarkGray
+    Write-Host "  | OGD WINCAFFE NEXT 8.0.10                                           |" -F Black -BackgroundColor Gray
+    Write-Host "  | Windows NT Professional Tuning Console                             |" -F Black -BackgroundColor Gray
+    Write-Host "  +--------------------------------------------------------------------+" -F DarkGray
+    Write-Host "  | PROFILES | GAMING | DEVICES | REPAIR | NETWORK | SUPPORT          |" -F Black -BackgroundColor White
+    Write-Host "  +--------------------------------------------------------------------+" -F DarkGray
+    Write-Host "  | STATUS : READY                                                     |" -F Cyan
     $targetLabel = (Get-OgdTargetLabel).PadRight(52)
     Write-Host "  | TARGET : $targetLabel|" -F White
-    Write-Host "  | PATH   : [2] NORMALE   [A] GAMING   [Y] 24H2+   [H] HOTFIX        |" -F Yellow
-    Write-Host "  +--------------------------------------------------------------------+`n" -F Gray
+    Write-Host "  | PATH   : [2] NORMALE   [A] GAMING   [Y] WIN11   [H] HOTFIX        |" -F Yellow
+    Write-Host "  +--------------------------------------------------------------------+`n" -F DarkGray
 }
 
 function Show-Steam {
-    for($i=0;$i -lt 2;$i++){
-        Start-Sleep -Milliseconds 100
-        Write-Host "`r                          ~ ~ ~           " -NoNewline -F DarkGray
-        Start-Sleep -Milliseconds 100
-        Write-Host "`r                         ~   ~   ~        " -NoNewline -F Gray
-        Start-Sleep -Milliseconds 100
-        Write-Host "`r                        ~     ☕     ~     " -NoNewline -F White
-    }
-    Write-Host "`r                           ( (           " -F DarkGray
+    Write-Host "  Sessione workstation inizializzata." -F DarkGray
 }
 
 function Write-Section([string]$T){
     Write-Host ""
-    Write-Host "  +--------------------------------------------------------------------+" -F Gray
+    Write-Host "  +--------------------------------------------------------------------+" -F DarkGray
     Write-Host ("  | {0}" -f $T.ToUpper().PadRight(66)) -F Black -BackgroundColor Gray
-    Write-Host "  +--------------------------------------------------------------------+" -F Gray
+    Write-Host "  +--------------------------------------------------------------------+" -F DarkGray
 }
 
 function Show-OgdMainMenu801 {
-    Write-Host "  +------------------------------+  +----------------------------------+" -F Gray
-    Write-Host "  | CORE PROFILES                |  | TOOLS / SPECIAL MODULES          |" -F Black -BackgroundColor Gray
-    Write-Host "  +------------------------------+  +----------------------------------+" -F Gray
-    Write-Host "  | [1] LIGHT                    |  | [6] FIX RETE     [7] EXPLORER   |" -F Green
-    Write-Host "  | [2] NORMALE                  |  | [8] INFO         [9] RESET      |" -F Yellow
-    Write-Host "  | [3] AGGRESSIVO               |  | [F] FILE I/O     [U] WINGET     |" -F Red
-    Write-Host "  | [A] AGGRESSIVO GAMING        |  | [W] WINREVIVE    [N] NETWORK    |" -F Cyan
-    Write-Host "  | [4] LAPTOP                   |  | [G] NVIDIA       [L] DPC FIX    |" -F Green
-    Write-Host "  | [5] LAPTOP GAMING            |  | [P] NPU          [E] UNREAL     |" -F Yellow
-    Write-Host "  +------------------------------+  | [C] COD          [M] MOUSE       |" -F Gray
-    Write-Host "                                      | [D] DISCORD      [B] BETA       |" -F White
-    Write-Host "  +--------------------------------------------------------------------+" -F Gray
-    Write-Host "  | CYBER STATUS PANEL                                                 |" -F Black -BackgroundColor Gray
-    Write-Host "  +--------------------------------------------------------------------+" -F Gray
+    $pcTypeLabel = if($script:OgdPcType){ $script:OgdPcType } else { 'Desktop' }
+    $isDesktopUi = ($script:OgdIsDesktop -or [string]::IsNullOrWhiteSpace($script:OgdPcType))
+    $isLaptopUi = $script:OgdIsLaptop
+    $isLaptopGamingUi = $script:OgdIsLaptopGaming
+    $recommendedProfile = if($isLaptopGamingUi){ '[5] LAPTOP GAMING' } elseif($isLaptopUi){ '[4] LAPTOP' } else { '[2] NORMALE' }
+    $secondaryProfile = if($isLaptopGamingUi){ '[A] AGGRESSIVO GAMING' } elseif($isLaptopUi){ '[5] LAPTOP GAMING' } else { '[A] AGGRESSIVO GAMING' }
+    $panelTitle = if($isLaptopGamingUi){ 'MOBILE GAMING OPERATIONS PANEL' } elseif($isLaptopUi){ 'MOBILE WORKSTATION OPERATIONS PANEL' } else { 'DESKTOP OPERATIONS PANEL' }
+    $hintOne = if($isLaptopGamingUi){
+        '> [5] e il ramo principale per notebook gaming con livelli dedicati'
+    } elseif($isLaptopUi){
+        '> [4] e il ramo principale per notebook standard e ultrabook'
+    } else {
+        '> [2] resta il preset consigliato per la maggior parte dei desktop'
+    }
+    $hintTwo = if($isLaptopGamingUi){
+        '> [A] e [C] servono come supporto gaming dedicato quando vuoi spingere di piu'
+    } elseif($isLaptopUi){
+        '> [5] va usato solo se il notebook e davvero una macchina gaming in carica'
+    } else {
+        '> [A] e [C] raccolgono i percorsi piu orientati al gaming desktop'
+    }
+    $hintThree = if($isLaptopGamingUi){
+        '> [H] per fix mirati, [J] per reset rete e DNS automatici'
+    } elseif($isLaptopUi){
+        '> [H] per fix mirati, [J] per reset rete e DNS automatici'
+    } else {
+        '> [H] per fix mirati, [J] per reset rete e DNS automatici'
+    }
+
+    Write-Host "  +--------------------------------+  +--------------------------------+" -F DarkGray
+    Write-Host "  | CORE PROFILES                  |  | TOOLS AND SPECIAL MODULES      |" -F Black -BackgroundColor Gray
+    Write-Host "  +--------------------------------+  +--------------------------------+" -F DarkGray
+    Write-Host "  | [1] LIGHT                      |  | [6] FIX RETE   [7] EXPLORER   |" -F Green
+    Write-Host "  | [2] NORMALE                    |  | [8] INFO       [9] RESET      |" -F Yellow
+    Write-Host "  | [3] AGGRESSIVO                 |  | [F] FILE I/O   [U] WINGET     |" -F Red
+    Write-Host "  | [A] AGGRESSIVO GAMING          |  | [W] WINREVIVE  [N] NETWORK    |" -F Cyan
+    Write-Host "  | [4] LAPTOP                     |  | [G] NVIDIA     [L] DPC FIX    |" -F Green
+    Write-Host "  | [5] LAPTOP GAMING              |  | [P] NPU        [E] UNREAL     |" -F Yellow
+    Write-Host "  +--------------------------------+  | [C] COD        [M] MOUSE       |" -F DarkGray
+    Write-Host "                                        | [D] DISCORD    [B] BETA       |" -F White
+    Write-Host "  +--------------------------------------------------------------------+" -F DarkGray
+    Write-Host ("  | {0}" -f $panelTitle.PadRight(66)) -F Black -BackgroundColor Gray
+    Write-Host "  +--------------------------------------------------------------------+" -F DarkGray
     Write-Host "  | [Q] BENCHMARK   [T] MICRO TWEAKS   [K] SSD/NVME   [Y] WIN11 24H2+  |" -F White
-    Write-Host "  | [H] HOTFIX 8.0.10               [J] FIX PRE 8.0.10 [0] ESCI      |" -F Yellow
-    Write-Host "  |                                                                    |" -F White
-    Write-Host "  | > [2] preset consigliato                                           |" -F DarkGray
-    Write-Host "  | > [A] e [C] rami gaming dedicati                                   |" -F DarkGray
-    Write-Host "  | > [H] per fix mirati, [J] per bonifica pre-8.0.10                 |" -F DarkGray
-    Write-Host "  +--------------------------------------------------------------------+`n" -F Gray
+    Write-Host "  | [H] HOTFIX 8.0.10   [J] FIX RETE 8.0.9 / DNS   [Z] CAMBIA PROFILO  |" -F Yellow
+    Write-Host "  | [0] ESCI                                                           |" -F Yellow
+    Write-Host ("  | PC TYPE : {0}" -f $pcTypeLabel.PadRight(56)) -F White
+    Write-Host ("  | PATH    : principale {0,-18} secondario {1,-16}|" -f $recommendedProfile,$secondaryProfile) -F DarkCyan
+    Write-Host ("  | {0}" -f $hintOne.PadRight(66)) -F DarkGray
+    Write-Host ("  | {0}" -f $hintTwo.PadRight(66)) -F DarkGray
+    Write-Host ("  | {0}" -f $hintThree.PadRight(66)) -F DarkGray
+    Write-Host "  | > [Z] riapre subito la scelta Desktop / Laptop / Laptop Gaming    |" -F DarkGray
+    Write-Host "  +--------------------------------------------------------------------+`n" -F DarkGray
     Write-Host ""
 }
 
@@ -1457,9 +1460,9 @@ function Write-MenuHint {
     Write-Host ""
 }
 
-function Write-Success([string]$M){Write-Host "  ✓ $M" -F Green}
-function Write-Info([string]$M){Write-Host "  ℹ $M" -F Cyan}
-function Write-Warning([string]$M){Write-Host "  ⚠ $M" -F Yellow}
+function Write-Success([string]$M){Write-Host "  [OK] $M" -F Green}
+function Write-Info([string]$M){Write-Host "  [INFO] $M" -F Cyan}
+function Write-Warning([string]$M){Write-Host "  [WARN] $M" -F Yellow}
 
 function Show-OgdWorkingAnimation {
     param(
@@ -1475,7 +1478,7 @@ function Show-OgdWorkingAnimation {
         Start-Sleep -Milliseconds ([Math]::Min([Math]::Max($DurationMs,150),1800))
         return
     }
-    $frames = @('⠋','⠙','⠹','⠸','⠼','⠴','⠦','⠧','⠇','⠏')
+    $frames = @('|','/','-','\')
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
     $i = 0
     while($sw.ElapsedMilliseconds -lt $DurationMs){
@@ -2006,24 +2009,28 @@ function Repair-OgdOpenDyslexicRegistration {
 
 function Enable-OgdOpenDyslexicAsDefault {
     New-OgdOpenDyslexicRestorePoint
-    $substPaths = @('HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontSubstitutes')
+    $substPaths = @(
+        'HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontSubstitutes',
+        'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontSubstitutes'
+    )
     foreach($spath in $substPaths){
         if(!(Test-Path $spath)){ New-Item $spath -Force -EA SilentlyContinue | Out-Null }
-        # Modalita compatibile: evitiamo alias shell globali che possono far sparire testi in app legacy o moderne.
-        Set-ItemProperty $spath -Name 'Segoe UI'      -Value 'OpenDyslexic'      -Type String -Force -EA SilentlyContinue
-        Set-ItemProperty $spath -Name 'Segoe UI Bold' -Value 'OpenDyslexic Bold' -Type String -Force -EA SilentlyContinue
-        foreach($name in @('MS Shell Dlg','MS Shell Dlg 2')){
-            try{ Remove-ItemProperty $spath -Name $name -EA SilentlyContinue }catch{}
-        }
+        Set-ItemProperty $spath -Name 'Segoe UI'             -Value 'OpenDyslexic'             -Type String -Force -EA SilentlyContinue
+        Set-ItemProperty $spath -Name 'Segoe UI Variable'    -Value 'OpenDyslexic'             -Type String -Force -EA SilentlyContinue
+        Set-ItemProperty $spath -Name 'Segoe UI Bold'        -Value 'OpenDyslexic Bold'        -Type String -Force -EA SilentlyContinue
+        Set-ItemProperty $spath -Name 'Segoe UI Italic'      -Value 'OpenDyslexic Italic'      -Type String -Force -EA SilentlyContinue
+        Set-ItemProperty $spath -Name 'Segoe UI Bold Italic' -Value 'OpenDyslexic Bold Italic' -Type String -Force -EA SilentlyContinue
+        Set-ItemProperty $spath -Name 'MS Shell Dlg'         -Value 'OpenDyslexic'             -Type String -Force -EA SilentlyContinue
+        Set-ItemProperty $spath -Name 'MS Shell Dlg 2'       -Value 'OpenDyslexic'             -Type String -Force -EA SilentlyContinue
     }
     Ensure-OgdClearTypeEnabled
     Send-OgdFontChangeBroadcast
     Restart-OgdFontSubsystem
-    Write-Success 'OpenDyslexic applicato in modalita compatibile per evitare testi mancanti nelle app'
-    Show-OgdWhatThisDoes 'OpenDyslexic sistema: modalita compatibile' @(
-        'sostituito solo Segoe UI a livello utente, non piu gli alias shell globali',
-        'lasciati intatti i font icone/simboli e gli alias che in alcune app facevano sparire il testo',
-        'se alcune app restano problematiche, usa il ripristino font standard e poi riprova'
+    Write-Success 'OpenDyslexic applicato come font di sistema in modo piu visibile'
+    Show-OgdWhatThisDoes 'OpenDyslexic sistema: applicazione estesa' @(
+        'impostati i sostituti principali di Segoe UI sia lato utente sia lato sistema',
+        'riattivati anche gli alias shell principali per far vedere davvero il cambio nelle finestre Windows',
+        'se qualche app mostra problemi grafici, usa il ripristino font standard dal menu dedicato'
     )
 }
 
@@ -2154,22 +2161,20 @@ function Install-OgdOpenDyslexic {
             $installedOne = $true
         }catch{}
 
-        if(-not $installedOne){
-            try{
-                $sysFonts = Join-Path $env:SystemRoot 'Fonts'
-                $destSys  = Join-Path $sysFonts $font.File
-                if(-not (Test-Path $fontRegS)){ New-Item $fontRegS -Force -EA SilentlyContinue | Out-Null }
-                Copy-Item $source $destSys -Force -EA Stop
-                Set-ItemProperty $fontRegS -Name $font.RegName -Value $font.File -Force -EA SilentlyContinue
-                try{ [OGDFontInterop802HF4]::AddFontResourceEx($destSys,0,[IntPtr]::Zero) | Out-Null }catch{}
-                $installedOne = $true
-            }catch{}
-        }
+        try{
+            $sysFonts = Join-Path $env:SystemRoot 'Fonts'
+            $destSys  = Join-Path $sysFonts $font.File
+            if(-not (Test-Path $fontRegS)){ New-Item $fontRegS -Force -EA SilentlyContinue | Out-Null }
+            Copy-Item $source $destSys -Force -EA Stop
+            Set-ItemProperty $fontRegS -Name $font.RegName -Value $font.File -Force -EA SilentlyContinue
+            try{ [OGDFontInterop802HF4]::AddFontResourceEx($destSys,0,[IntPtr]::Zero) | Out-Null }catch{}
+            $installedOne = $true
+        }catch{}
 
-        if($installedOne){
-            Write-Success "OpenDyslexic pronto: $($font.File)"
-        } else {
+        if(-not $installedOne){
             Write-Warning "OpenDyslexic non installato: $($font.File)"
+        } else {
+            Write-Success "OpenDyslexic pronto: $($font.File)"
         }
     }
 
@@ -2457,7 +2462,7 @@ function Invoke-OgdWin24H2Tweaks {
     }
 
     if($CreateRestorePoint){
-        $desc24 = "OGD WinCaffè v8.0.10 WIN11 24H2+ - $(Get-Date -Format 'dd/MM/yyyy HH:mm')"
+        $desc24 = "OGD WinCaffe NEXT v8.0.10 WIN11 24H2+ - $(Get-Date -Format 'dd/MM/yyyy HH:mm')"
         New-OgdRestorePoint -Description $desc24
         Write-Host ""
     }
@@ -2552,7 +2557,7 @@ function Invoke-OgdWin10Tweaks {
     Write-Section "WINDOWS 10 TWEAKS"
 
     if($CreateRestorePoint){
-        $desc10 = "OGD WinCaffè v8.0.10 WIN10 - $(Get-Date -Format 'dd/MM/yyyy HH:mm')"
+        $desc10 = "OGD WinCaffe NEXT v8.0.10 WIN10 - $(Get-Date -Format 'dd/MM/yyyy HH:mm')"
         New-OgdRestorePoint -Description $desc10
         Write-Host ""
     }
@@ -2744,10 +2749,10 @@ function Invoke-OgdPre798NetworkDiscordRepair {
     param([switch]$CreateRestorePoint)
 
     Show-Banner
-    Write-Section "FIX RETE / DISCORD LEGACY"
+    Write-Section "FIX RETE 8.0.9 / DNS DEFAULT"
 
     if($CreateRestorePoint){
-        $desc798 = "OGD WinCaffè v8.0.10 FIX RETE LEGACY - $(Get-Date -Format 'dd/MM/yyyy HH:mm')"
+        $desc798 = "OGD WinCaffe NEXT v8.0.10 FIX RETE 8.0.9 - $(Get-Date -Format 'dd/MM/yyyy HH:mm')"
         New-OgdRestorePoint -Description $desc798
         Write-Host ""
     }
@@ -2781,11 +2786,11 @@ function Invoke-OgdPre798NetworkDiscordRepair {
     }
     Write-Success "Servizi rete riavviati dove disponibili"
 
-    Write-Info "[6] Discord: controlli base di connessione..."
+    Write-Info "[6] Controlli finali rete e connettivita..."
     try{ tzutil /s "W. Europe Standard Time" 2>$null | Out-Null }catch{}
     try{ Set-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings" -Name ProxyEnable -Value 0 -Type DWord -Force -EA SilentlyContinue }catch{}
-    Write-Host "  • Verifica manuale consigliata: data/ora automatiche, proxy OFF e Discord permesso nel firewall." -F DarkGray
-    Write-Host "  • Se Discord resta bloccato, chiudilo e svuota cache in %AppData%\\discord\\Cache / Code Cache / GPUCache." -F DarkGray
+    Write-Host "  • Verifica manuale consigliata: data/ora automatiche, proxy OFF e DNS di rete tornati su automatico." -F DarkGray
+    Write-Host "  • Se una singola app ha ancora problemi, il focus ora non e sui DNS custom ma sul suo runtime o sulla sua cache locale." -F DarkGray
     Write-Success "Fix Discord preparato"
 
     Write-Info "[7] Orario di sistema / Windows Time..."
@@ -2807,9 +2812,9 @@ function Invoke-OgdPre798NetworkDiscordRepair {
 function Show-OgdPre798FixMenu {
     while($true){
         Show-Banner
-        Write-Section "FIX RETE LEGACY"
-        Write-Host "  [1] Mostra cosa corregge il fix rete legacy" -F White
-        Write-Host "  [2] Applica il fix rete/Discord subito" -F Yellow
+        Write-Section "FIX RETE 8.0.9 / DNS DEFAULT"
+        Write-Host "  [1] Mostra cosa corregge il fix rete 8.0.9" -F White
+        Write-Host "  [2] Applica il fix rete/DNS subito" -F Yellow
         Write-Host "  [3] Crea punto di ripristino e poi applica" -F Green
         Write-Host "  [0] Torna al menu`n" -F DarkGray
         $choice798 = Read-Host "  Scelta (1/2/3/0)"
@@ -2820,8 +2825,8 @@ function Show-OgdPre798FixMenu {
                 Write-Host "    • tweak TCP/IP legacy che possono rallentare tutto il sistema" -F DarkGray
                 Write-Host "    • override persistenti delle NIC che richiedono reset manuale della scheda" -F DarkGray
                 Write-Host "    • proxy / winsock / stack IP disallineati" -F DarkGray
-                Write-Host "    • Discord bloccato su connecting / loading infinito" -F DarkGray
-                Write-Host "    • orario di sistema / Windows Time non sincronizzati correttamente" -F DarkGray
+                Write-Host "    • DNS rimasti forzati invece che riportati su automatico/default" -F DarkGray
+                Write-Host "    • cache rete e servizi DHCP/DNS da riallineare in modo pulito" -F DarkGray
                 Read-Host "  INVIO per continuare"
             }
             '2' { Invoke-OgdPre798NetworkDiscordRepair }
@@ -2992,6 +2997,9 @@ function Show-OgdAmdGpuMenu {
     Write-Host "  +--------------------------------------------------------------------+" -F DarkRed
     Write-Host "  | AMD GPU TWEAKS // RADEON CONTROL PANEL                             |" -F Red
     Write-Host "  +--------------------------------------------------------------------+" -F DarkRed
+    Write-Host "  | NOTA: non avendo ancora hardware AMD reale da testare, questo ramo |" -F Yellow
+    Write-Host "  | e fornito cosi com'e, senza supporto ufficiale. Uso a rischio tuo. |" -F Yellow
+    Write-Host "  +--------------------------------------------------------------------+" -F DarkRed
     Write-Host "  | [1] LIGHT  - profilo safe per driver e latenze stabili             |" -F White
     Write-Host "  | [2] NORMALE- gaming bilanciato per RDNA2/RDNA3/RDNA4              |" -F White
     Write-Host "  | [3] ULTRA  - preset piu spinto ma sempre prudente                  |" -F White
@@ -3006,6 +3014,9 @@ function Show-OgdAmdCpuMenu {
     Write-Host "  +--------------------------------------------------------------------+" -F DarkMagenta
     Write-Host "  | AMD CPU TWEAKS // RYZEN PERFORMANCE DECK                           |" -F Magenta
     Write-Host "  +--------------------------------------------------------------------+" -F DarkMagenta
+    Write-Host "  | NOTA: non avendo ancora CPU AMD reale da validare, questo ramo e   |" -F Yellow
+    Write-Host "  | distribuito senza supporto ufficiale. Uso a rischio dell'utente.   |" -F Yellow
+    Write-Host "  +--------------------------------------------------------------------+" -F DarkMagenta
     Write-Host "  | [1] LIGHT  - profilo safe per Ryzen desktop/laptop                 |" -F White
     Write-Host "  | [2] NORMALE- boost reattivo e scheduler pulito                     |" -F White
     Write-Host "  | [3] ALTO   - desktop potente / X3D in carico gaming               |" -F White
@@ -3015,6 +3026,118 @@ function Show-OgdAmdCpuMenu {
     Show-OgdAddonAppsHint 'AMDCPU'
 }
 
+function Set-OgdAmdGpuPreset {
+    param(
+        [ValidateSet('LIGHT','NORMALE','ULTRA')]
+        [string]$Preset
+    )
+
+    $gpuName = ''
+    try{
+        $gpuName = (Get-CimInstance Win32_VideoController -EA SilentlyContinue | Where-Object { $_.Name -match 'AMD|Radeon' } | Select-Object -First 1 -ExpandProperty Name)
+    }catch{}
+    if([string]::IsNullOrWhiteSpace($gpuName)){
+        Write-Warning 'GPU AMD/Radeon non rilevata con certezza: applico solo il profilo di supporto lato Windows'
+    }
+
+    $planMode = 'Current'
+    $enableHags = $false
+    switch($Preset){
+        'LIGHT'   { $planMode = 'Current';  $enableHags = $false }
+        'NORMALE' { $planMode = 'High';     $enableHags = $true  }
+        'ULTRA'   { $planMode = 'Ultimate'; $enableHags = $true  }
+    }
+
+    $scheme = Set-OgdPreferredPowerPlan -Plan $planMode
+    Show-OgdWorkingAnimation -Text ("Applicazione preset AMD GPU {0}..." -f $Preset) -DurationMs 950 -Color Magenta
+
+    reg add "HKCU\Software\Microsoft\GameBar" /v "AutoGameModeEnabled"   /t REG_DWORD /d 1 /f 2>$null|Out-Null
+    reg add "HKCU\Software\Microsoft\GameBar" /v "AllowAutoGameMode"     /t REG_DWORD /d 1 /f 2>$null|Out-Null
+    reg add "HKCU\System\GameConfigStore"     /v "GameDVR_Enabled"       /t REG_DWORD /d 0 /f 2>$null|Out-Null
+    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR" /v "AllowGameDVR" /t REG_DWORD /d 0 /f 2>$null|Out-Null
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\PriorityControl" /v "Win32PrioritySeparation" /t REG_DWORD /d 0x26 /f 2>$null|Out-Null
+    if($enableHags){
+        try{ reg add "HKLM\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" /v "HwSchMode" /t REG_DWORD /d 2 /f 2>$null|Out-Null }catch{}
+    }
+    try{ powercfg /setactive $scheme 2>$null | Out-Null }catch{}
+
+    Write-Success ("AMD GPU {0}: preset applicato." -f $Preset)
+    Show-OgdWhatThisDoes 'Questo preset AMD GPU ha applicato' @(
+        ("profilo energetico: {0}" -f $(if($planMode -eq 'Current'){'profilo attivo corrente'}elseif($planMode -eq 'High'){'Prestazioni elevate, se disponibili'}else{'Prestazioni ultimate, se disponibili'})),
+        'abilitati Game Mode e scheduler Win32 reattivo con DVR disattivato per ridurre overlay e catture inutili',
+        ("HAGS {0} come supporto lato Windows al rendering moderno" -f $(if($enableHags){'attivato'}else{'lasciato invariato'})),
+        ("target GPU rilevato: {0}" -f $(if($gpuName){$gpuName}else{'non determinato con certezza'}))
+    )
+}
+
+function Set-OgdAmdCpuPreset {
+    param(
+        [ValidateSet('LIGHT','NORMALE','ALTO','ULTRA')]
+        [string]$Preset
+    )
+
+    $cpuName = ''
+    try{
+        $cpuName = (Get-CimInstance Win32_Processor -EA SilentlyContinue | Select-Object -First 1 -ExpandProperty Name)
+    }catch{}
+    if(($cpuName -notmatch 'AMD|Ryzen') -and -not [string]::IsNullOrWhiteSpace($cpuName)){
+        Write-Warning ("CPU non AMD rilevata ({0}): applico solo il profilo Windows lato processore" -f $cpuName)
+    }
+
+    $planMode = 'Current'
+    $minAc = 5
+    $minDc = 5
+    $incThreshold = 15
+    $decThreshold = 12
+    switch($Preset){
+        'LIGHT' {
+            $planMode = 'Current'
+        }
+        'NORMALE' {
+            $planMode = 'High'
+            $minAc = 10
+            $incThreshold = 10
+            $decThreshold = 8
+        }
+        'ALTO' {
+            $planMode = 'High'
+            $minAc = 15
+            $minDc = 8
+            $incThreshold = 8
+            $decThreshold = 6
+        }
+        'ULTRA' {
+            $planMode = 'Ultimate'
+            $minAc = 25
+            $minDc = 10
+            $incThreshold = 6
+            $decThreshold = 4
+        }
+    }
+
+    $scheme = Set-OgdPreferredPowerPlan -Plan $planMode
+    Show-OgdWorkingAnimation -Text ("Applicazione preset AMD CPU {0}..." -f $Preset) -DurationMs 1000 -Color Red
+
+    try{ powercfg /setacvalueindex $scheme SUB_PROCESSOR PERFBOOSTMODE 1 2>$null | Out-Null }catch{}
+    try{ powercfg /setdcvalueindex $scheme SUB_PROCESSOR PERFBOOSTMODE 1 2>$null | Out-Null }catch{}
+    try{ powercfg /setacvalueindex $scheme SUB_PROCESSOR PROCTHROTTLEMIN $minAc 2>$null | Out-Null }catch{}
+    try{ powercfg /setdcvalueindex $scheme SUB_PROCESSOR PROCTHROTTLEMIN $minDc 2>$null | Out-Null }catch{}
+    try{ powercfg /setacvalueindex $scheme SUB_PROCESSOR PERFINCTHRESHOLD $incThreshold 2>$null | Out-Null }catch{}
+    try{ powercfg /setdcvalueindex $scheme SUB_PROCESSOR PERFINCTHRESHOLD $incThreshold 2>$null | Out-Null }catch{}
+    try{ powercfg /setacvalueindex $scheme SUB_PROCESSOR PERFDECTHRESHOLD $decThreshold 2>$null | Out-Null }catch{}
+    try{ powercfg /setdcvalueindex $scheme SUB_PROCESSOR PERFDECTHRESHOLD $decThreshold 2>$null | Out-Null }catch{}
+    try{ powercfg /setactive $scheme 2>$null | Out-Null }catch{}
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\PriorityControl" /v "Win32PrioritySeparation" /t REG_DWORD /d 0x26 /f 2>$null|Out-Null
+
+    Write-Success ("AMD CPU {0}: preset applicato." -f $Preset)
+    Show-OgdWhatThisDoes 'Questo preset AMD CPU ha applicato' @(
+        ("profilo energetico: {0}" -f $(if($planMode -eq 'Current'){'profilo attivo corrente'}elseif($planMode -eq 'High'){'Prestazioni elevate, se disponibili'}else{'Prestazioni ultimate, se disponibili'})),
+        ("soglia minima CPU {0}% in AC e {1}% in batteria con boost moderato e prudente" -f $minAc,$minDc),
+        ("scheduler Win32 reattivo senza overclock e senza chiavi AMD non documentate"),
+        ("target CPU rilevato: {0}" -f $(if($cpuName){$cpuName}else{'non determinato con certezza'}))
+    )
+}
+
 function Invoke-OgdAmdGpuMenu {
     while($true){
         Show-OgdAmdGpuMenu
@@ -3022,20 +3145,20 @@ function Invoke-OgdAmdGpuMenu {
         switch($amdGpuChoice){
             '1' {
                 Write-Host ""
-                Write-Host "  ✓ AMD GPU LIGHT: profilo safe Radeon applicato come base prudente." -F Green
-                Write-Host "    Focus su stabilita driver, latenza coerente e zero tweak aggressivi." -F DarkGray
+                Write-Host "  → AMD GPU LIGHT: profilo safe Radeon." -F DarkGray
+                Set-OgdAmdGpuPreset -Preset 'LIGHT'
                 Read-Host "  INVIO per continuare" | Out-Null
             }
             '2' {
                 Write-Host ""
-                Write-Host "  ✓ AMD GPU NORMALE: profilo bilanciato per gaming moderno pronto." -F Green
-                Write-Host "    Pensato per RDNA recenti con comportamento pulito e compatibile." -F DarkGray
+                Write-Host "  → AMD GPU NORMALE: profilo bilanciato per Radeon gaming." -F DarkGray
+                Set-OgdAmdGpuPreset -Preset 'NORMALE'
                 Read-Host "  INVIO per continuare" | Out-Null
             }
             '3' {
                 Write-Host ""
-                Write-Host "  ✓ AMD GPU ULTRA: preset piu spinto ma ancora practical-safe." -F Green
-                Write-Host "    Da usare su sistemi stabili con driver gia rodato." -F DarkGray
+                Write-Host "  → AMD GPU ULTRA: profilo piu spinto ma ancora prudente." -F DarkGray
+                Set-OgdAmdGpuPreset -Preset 'ULTRA'
                 Read-Host "  INVIO per continuare" | Out-Null
             }
             '0' { return }
@@ -3054,26 +3177,26 @@ function Invoke-OgdAmdCpuMenu {
         switch($amdCpuChoice){
             '1' {
                 Write-Host ""
-                Write-Host "  ✓ AMD CPU LIGHT: profilo safe per Ryzen applicato in modo prudente." -F Green
-                Write-Host "    Buona base per desktop e laptop senza forzare chiavi rischiose." -F DarkGray
+                Write-Host "  → AMD CPU LIGHT: profilo safe per Ryzen." -F DarkGray
+                Set-OgdAmdCpuPreset -Preset 'LIGHT'
                 Read-Host "  INVIO per continuare" | Out-Null
             }
             '2' {
                 Write-Host ""
-                Write-Host "  ✓ AMD CPU NORMALE: profilo bilanciato per Ryzen / X3D pronto." -F Green
-                Write-Host "    Reattivita maggiore e comportamento gaming/work piu pulito." -F DarkGray
+                Write-Host "  → AMD CPU NORMALE: profilo bilanciato per Ryzen / X3D." -F DarkGray
+                Set-OgdAmdCpuPreset -Preset 'NORMALE'
                 Read-Host "  INVIO per continuare" | Out-Null
             }
             '3' {
                 Write-Host ""
-                Write-Host "  ✓ AMD CPU ALTO: preset per desktop potente o X3D ben raffreddato." -F Green
-                Write-Host "    Profilo piu spinto ma senza overclock o tweak non documentati." -F DarkGray
+                Write-Host "  → AMD CPU ALTO: preset per desktop potente o X3D ben raffreddato." -F DarkGray
+                Set-OgdAmdCpuPreset -Preset 'ALTO'
                 Read-Host "  INVIO per continuare" | Out-Null
             }
             '4' {
                 Write-Host ""
-                Write-Host "  ✓ AMD CPU ULTRA: preset enthusiast caricato come base controllata." -F Green
-                Write-Host "    Da usare su sistemi stabili, testati e con termiche sotto controllo." -F DarkGray
+                Write-Host "  → AMD CPU ULTRA: preset enthusiast controllato." -F DarkGray
+                Set-OgdAmdCpuPreset -Preset 'ULTRA'
                 Read-Host "  INVIO per continuare" | Out-Null
             }
             '0' { return }
@@ -3300,6 +3423,78 @@ function Set-OgdPreferredPowerPlan {
         return $target
     }
     return (Get-OgdActivePowerSchemeGuid)
+}
+
+function Invoke-OgdFullRollbackToDefault {
+    param([string]$ProfileLabel = 'profilo corrente')
+
+    Show-Banner
+    Write-Section "ROLLBACK DEFAULT WINDOWS"
+    Write-Host ("  Profilo richiesto: {0}" -f $ProfileLabel) -F White
+    Write-Host "  Questo rollback prova a riportare il sistema ai default Windows, non a un preset OGD." -F Yellow
+    if((Read-Host "  Confermi il rollback completo? (S/N)") -notin @('S','s')){
+        Write-Host ""
+        Write-Host "  Rollback annullato." -F DarkGray
+        return $false
+    }
+
+    Write-Host ""
+    $desc = "OGD WinCaffe NEXT Rollback Default - $(Get-Date -Format 'dd/MM/yyyy HH:mm')"
+    New-OgdRestorePoint -Description $desc
+
+    Write-Info "Ripristino boot e timer nativi..."
+    foreach($bcd in @('useplatformclock','disabledynamictick','tscsyncpolicy','x2apicpolicy','useplatformtick')){
+        try{ bcdedit /deletevalue $bcd 2>$null | Out-Null }catch{}
+    }
+
+    Write-Info "Ripristino piani energetici Windows..."
+    try{ powercfg -restoredefaultschemes 2>$null | Out-Null }catch{}
+    try{ powercfg /setactive SCHEME_BALANCED 2>$null | Out-Null }catch{}
+
+    Write-Info "Ripristino memory management e scheduler..."
+    $mm = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management'
+    try{ Set-ItemProperty $mm -Name 'DisablePagingExecutive' -Value 0 -Type DWord -Force -EA SilentlyContinue }catch{}
+    try{ Set-ItemProperty $mm -Name 'LargeSystemCache' -Value 0 -Type DWord -Force -EA SilentlyContinue }catch{}
+    foreach($name in @('NonPagedPoolSize','SessionViewSize','SessionPoolSize','SystemPages','IoPageLockLimit','SecondLevelDataCache')){
+        try{ Remove-ItemProperty -Path $mm -Name $name -Force -EA SilentlyContinue }catch{}
+    }
+    $pp = "$mm\PrefetchParameters"
+    try{ if(!(Test-Path $pp)){ New-Item $pp -Force -EA SilentlyContinue | Out-Null } }catch{}
+    try{ Set-ItemProperty $pp -Name 'EnableSuperfetch' -Value 3 -Type DWord -Force -EA SilentlyContinue }catch{}
+    try{ Set-ItemProperty $pp -Name 'EnablePrefetcher' -Value 3 -Type DWord -Force -EA SilentlyContinue }catch{}
+    try{ reg add "HKLM\SYSTEM\CurrentControlSet\Control\PriorityControl" /v "Win32PrioritySeparation" /t REG_DWORD /d 2 /f 2>$null|Out-Null }catch{}
+
+    Write-Info "Ripristino impostazioni gaming e grafica lato Windows..."
+    try{ reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR" /v "AllowGameDVR" /f 2>$null|Out-Null }catch{}
+    foreach($pair in @(
+        @{Path='HKCU:\Software\Microsoft\GameBar'; Name='AutoGameModeEnabled'},
+        @{Path='HKCU:\Software\Microsoft\GameBar'; Name='AllowAutoGameMode'},
+        @{Path='HKCU:\System\GameConfigStore'; Name='GameDVR_Enabled'},
+        @{Path='HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers'; Name='HwSchMode'}
+    )){
+        try{ Remove-ItemProperty -Path $pair.Path -Name $pair.Name -Force -EA SilentlyContinue }catch{}
+    }
+
+    Write-Info "Ripristino rete e DNS automatici..."
+    Reset-OgdDnsToAutomatic
+    try{ netsh winsock reset | Out-Null }catch{}
+    try{ netsh int ip reset | Out-Null }catch{}
+    try{ netsh winhttp reset proxy | Out-Null }catch{}
+    try{ ipconfig /flushdns | Out-Null }catch{}
+    try{ Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" -Name "EnableMulticast" -EA SilentlyContinue }catch{}
+    try{ Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Psched" -Name "NonBestEffortLimit" -EA SilentlyContinue }catch{}
+
+    Write-Info "Ripristino accessibilita font..."
+    try{ Disable-OgdOpenDyslexicAsDefault }catch{}
+
+    Show-OgdWhatThisDoes 'Rollback default completato' @(
+        'ripristinati i parametri boot/timer piu sensibili alla gestione nativa di Windows',
+        'riportati power plan, memory management, scheduler Win32 e impostazioni gaming verso default piu vicini al sistema pulito',
+        'DNS rimessi su automatico con reset Winsock/IP/WinHTTP e rimozione dei forzamenti principali',
+        'eventuale sostituzione font OpenDyslexic disattivata per tornare ai font standard'
+    )
+    Write-Success 'Rollback verso default Windows completato. Riavvia il PC per consolidare il ripristino.'
+    return $true
 }
 
 function Set-OgdIntelCpuPreset {
@@ -3780,7 +3975,7 @@ function Get-OgdNpuInfo {
     return [pscustomobject]$result
 }
 
-function Write-Error2([string]$M){Write-Host "  ✗ $M" -F Red}
+function Write-Error2([string]$M){Write-Host "  [ERR] $M" -F Red}
 
 # ═════════════════════════════════════════════════════════════════════════════
 #  HARDWARE DETECTION
@@ -3827,25 +4022,7 @@ if($script:OgdTargetIsWindows11 -and (Test-OgdWindows24H2OrLater)){
 } elseif($script:OgdTargetIsWindows10){
     Write-Host "  • Target Windows 10 selezionato: il menu principale resta attivo e il ramo Windows 10 può essere richiamato separatamente." -F Cyan
 }
-Write-Host "  • Il fix rete/Discord legacy resta disponibile dal menu dedicato, ma non viene più proposto automaticamente." -F DarkGray
-if($openPre798Fix -in @('S','s','Y','y')){
-    Show-OgdPre798FixMenu
-    Show-Banner
-    Show-Steam
-    Write-Section "RILEVAMENTO SISTEMA"
-    Write-Info "CPU: $($cpu.Name)"
-    Write-Info "Core: $($cpu.NumberOfCores) fisici / $($cpu.NumberOfLogicalProcessors) logici"
-    Write-Info "RAM: $ram GB | Build: $build | Tipo: $(if($isLaptop){'💻 Laptop'}else{'🖥️ Desktop'})"
-    Write-Info "Target scelto: Windows $($script:OgdTargetWindowsFamily) - $($script:OgdTargetWindowsRelease)"
-    if($hasNPU){
-        $src = if($npuInfo.DriverReady){'device/driver pronto'}elseif($npuInfo.Source -match 'CPU'){ 'integrata nella CPU ma driver/device non pronto' }else{'device presente ma non pronto'}
-        Write-Info "NPU: ✓ $($npuInfo.Name) 🧠 ($src)"
-        if($npuInfo.Advice){ Write-Warning $npuInfo.Advice }
-    }else{
-        Write-Warning 'NPU: non rilevata (nessuna NPU individuata da CPU o driver)'
-    }
-    Show-OgdGraphicsDiagnostics -ExpectedGpuName ((Get-CimInstance Win32_VideoController -EA SilentlyContinue | Select-Object -First 1).Name)
-}
+Write-Host "  • Il fix rete 8.0.9 / DNS default resta disponibile dal menu [J] dedicato." -F DarkGray
 
 Write-Host ""
 if($ram -lt 12){Write-Warning "RAM < 12GB - Ottimizzazioni aggressive";if((Read-Host "  Continuare? (S/N)") -notin @("S","s")){exit}}
@@ -3858,7 +4035,7 @@ Show-Banner
 Write-Section "BACKUP E SICUREZZA"
 
 # Punto ripristino
-$desc="OGD WinCaffè v8.0.10 - $(Get-Date -Format 'dd/MM/yyyy HH:mm')"
+$desc="OGD WinCaffe NEXT v8.0.10 - $(Get-Date -Format 'dd/MM/yyyy HH:mm')"
 New-OgdRestorePoint -Description $desc
 
 Write-Host "";Start-Sleep 1
@@ -3971,26 +4148,26 @@ Write-Host "`n  ┌────────────────────�
 Write-Host "  │ ⚡ LIVELLI DI OTTIMIZZAZIONE GUIDATI                   │" -F Cyan
 Write-Host "  └─────────────────────────────────────────────────────────┘`n" -F Cyan
 
-Write-Host "  [1] 🟢 LIGHT - Ottimizzazioni base (safe al 100%)" -F White
+Write-Host "  [1] LIGHT - Ottimizzazioni base (safe al 100%)" -F White
       Write-Host "      Shell/UI, rete, Explorer e login più snello senza toccare memoria profonda" -F DarkGray
 Write-Host "      Consigliato: Tutti | Impatto: SAFE | Risultato: sistema piu reattivo e pulito`n" -F DarkGray
 
-Write-Host "  [2] 🟡 NORMALE - Completo per gaming/lavoro (raccomandato)" -F White
+Write-Host "  [2] NORMALE - Completo per gaming/lavoro (raccomandato)" -F White
 Write-Host "      Light + priorità processi/core apps + NPU + debloat + login/logout più pronti" -F DarkGray
 Write-Host "      Consigliato: Gaming PC/Desktop generale | Impatto: MEDIO | Risultato: miglior equilibrio prestazioni/compatibilita`n" -F DarkGray
 
-Write-Host "  [3] 🔴 AGGRESSIVO - Massima performance (più invasivo)" -F White
+Write-Host "  [3] AGGRESSIVO - Massima performance (piu invasivo)" -F White
 Write-Host "      Normale + memoria/storage + svchost split + boot/shutdown/reboot più rapidi" -F DarkGray
 Write-Host "      Consigliato: Enthusiast/Desktop potente | Impatto: ALTO | Risultato: latenza e overhead ridotti, ma piu rischio side effect`n" -F DarkGray
 
-Write-Host "  [A] ⚡ AGGRESSIVO GAMING - Sub-menu livelli gaming (Light/Normale/Full)" -F Magenta
+Write-Host "  [A] AGGRESSIVO GAMING - Sub-menu livelli gaming (Light/Normale/Full)" -F Magenta
 Write-Host "      Percorso gaming dedicato: utile se vuoi una scelta guidata solo per il gioco`n" -F DarkGray
 
-Write-Host "  [4] 💻 LAPTOP - Ottimizzazione laptop (sub-menu livelli)" -F White
+Write-Host "  [4] LAPTOP - Ottimizzazione laptop (sub-menu livelli)" -F White
 Write-Host "      Light/Normale/Alto/Ultra — bilanciato batteria/performance" -F DarkGray
       Write-Host "      Consigliato: Laptop | Sicuro per batteria e termica`n" -F DarkGray
 
-Write-Host "  [5] 🎮 LAPTOP GAMING - Laptop da gaming (sub-menu livelli)" -F White
+Write-Host "  [5] LAPTOP GAMING - Laptop da gaming (sub-menu livelli)" -F White
 Write-Host "      Light/Normale/Alto/Ultra — gaming laptop ottimizzato" -F DarkGray
 Write-Host "      Consigliato: Gaming laptop | In carica per Ultra`n" -F DarkGray
 
@@ -3998,37 +4175,42 @@ Write-Host "  ┌─────────────────────
 Write-Host "  │ 🔧 STRUMENTI AGGIUNTIVI                                │" -F Cyan
 Write-Host "  └─────────────────────────────────────────────────────────┘`n" -F Cyan
 
-Write-Host "  [6] 🌐 FIX RETE - Reset stack rete + DNS automatici di default" -F White
-Write-Host "  [7] 📁 EXPLORER - Solo cache folder views" -F White
-Write-Host "  [8] 📜 INFO - Cosa fa ogni livello" -F White
-Write-Host "  [9] 🔄 RESET - Punto ripristino Windows`n" -F White
-Write-Host "  [F] 📂 FILE I/O - Velocizza trasferimenti/installazioni`n" -F White
-Write-Host "  [U] 🔄 WINGET UPDATE - Aggiorna programmi installati`n" -F White
+Write-Host "  [6] FIX RETE - Reset stack rete + DNS automatici di default" -F White
+Write-Host "  [7] EXPLORER - Solo cache folder views" -F White
+Write-Host "  [8] INFO - Cosa fa ogni livello" -F White
+Write-Host "  [9] RESET - Punto ripristino Windows`n" -F White
+Write-Host "  [F] FILE I/O - Velocizza trasferimenti/installazioni`n" -F White
+Write-Host "  [U] WINGET UPDATE - Aggiorna programmi installati`n" -F White
 
-Write-Host "  [W] 🛠️  WINREVIVE - Riparazione Windows" -F Cyan
-Write-Host "  [N] 📡 NET TWEAKS - WiFi + LAN ottimizzazione avanzata" -F Cyan
-Write-Host "  [G] 🟢 NVIDIA TWEAKS - Ottimizzazione GPU NVIDIA + extra software" -F Green
-Write-Host "  [R] 🔴 AMD GPU TWEAKS - Ottimizzazione GPU Radeon + extra software" -F Red
-Write-Host "  [X] 🔥 AMD CPU TWEAKS - Profili CPU Ryzen / X3D + tool utili" -F Magenta
-Write-Host "  [I] ⚙️  INTEL CPU TWEAKS - Profili Intel Core / Core Ultra + tool utili" -F Cyan
-Write-Host "  [L] ⚡ DPC LATENCY FIX - Risolvi lag/stuttering audio e sistema" -F Yellow
-Write-Host "  [P] 🧠 NPU TWEAKS - Ottimizzazione Neural Processing Unit" -F Cyan
-Write-Host "  [E] 🎮 UNREAL ENGINE - Ottimizzazioni UE4/UE5 (dev + gaming)" -F Yellow
-Write-Host "  [C] 🔫 CALL OF DUTY - Tweaks MW1→Black Ops 7 (safe, no ban)" -F Red
-Write-Host "  [M] 🖱️  MOUSE - Accelerazione ON/OFF + precisione massima" -F White
-Write-Host "  [D] 💬 DISCORD - Unisciti alla community OGD" -F Magenta
-Write-Host "  [B] 🧪 BETA 25H2 / 26220.8148 - Preset compatibilita stabile + Insider" -F Magenta
-Write-Host "  [Q] 📊 BENCHMARK PC - Analisi hardware e personalizzazione tweaks" -F Yellow
-Write-Host "  [T] 🧩 MICRO TWEAKS - Svchost split + folder thumbs + core parking" -F Cyan
-Write-Host "  [K] 💽 SSD & NVME SUPER TWEAKS - Safe storage boost per SSD e NVMe" -F Green
-Write-Host "  [H] 🩹 HOTFIX 8.0.10 - DX9 legacy + OpenDyslexic + NPU diag" -F Cyan
-Write-Host "  [0] ❌ ESCI - Chiudi script`n" -F Red
+Write-Host "  [W] WINREVIVE - Riparazione Windows" -F Cyan
+Write-Host "  [N] NET TWEAKS - WiFi + LAN ottimizzazione avanzata" -F Cyan
+Write-Host "  [G] NVIDIA TWEAKS - Ottimizzazione GPU NVIDIA + extra software" -F Green
+Write-Host "  [R] AMD GPU TWEAKS - Ottimizzazione GPU Radeon + extra software" -F Red
+Write-Host "  [X] AMD CPU TWEAKS - Profili CPU Ryzen / X3D + tool utili" -F Magenta
+Write-Host "  [I] INTEL CPU TWEAKS - Profili Intel Core / Core Ultra + tool utili" -F Cyan
+Write-Host "  [L] DPC LATENCY FIX - Risolvi lag/stuttering audio e sistema" -F Yellow
+Write-Host "  [P] NPU TWEAKS - Ottimizzazione Neural Processing Unit" -F Cyan
+Write-Host "  [E] UNREAL ENGINE - Ottimizzazioni UE4/UE5 (dev + gaming)" -F Yellow
+Write-Host "  [C] CALL OF DUTY - Tweaks MW1->Black Ops 7 (safe, no ban)" -F Red
+Write-Host "  [M] MOUSE - Accelerazione ON/OFF + precisione massima" -F White
+Write-Host "  [D] DISCORD - Unisciti alla community OGD" -F Magenta
+Write-Host "  [B] BETA 25H2 / 26220.8148 - Preset compatibilita stabile + Insider" -F Magenta
+Write-Host "  [Q] BENCHMARK PC - Analisi hardware e personalizzazione tweaks" -F Yellow
+Write-Host "  [T] MICRO TWEAKS - Svchost split + folder thumbs + core parking" -F Cyan
+Write-Host "  [K] SSD & NVME SUPER TWEAKS - Safe storage boost per SSD e NVMe" -F Green
+Write-Host "  [H] HOTFIX 8.0.10 - DX9 legacy + OpenDyslexic + NPU diag" -F Cyan
+Write-Host "  [0] ESCI - Chiudi script`n" -F Red
 
-$mode=Read-Host "  Scelta (1-9/A/B/F/U/W/N/G/R/X/I/L/P/E/C/M/D/H/J/Q/T/K/0)"
+$mode=Read-Host "  Scelta (1-9/A/B/F/U/W/N/G/R/X/I/L/P/E/C/M/D/H/J/Q/T/K/Y/Z/0)"
 
 
 if($mode -in @('H','h')){
     Show-OgdHotfixMenu -CpuName $cpu.Name
+    continue MenuLoop
+}
+
+if($mode -in @('Z','z')){
+    Select-OgdPcType
     continue MenuLoop
 }
 
@@ -4048,13 +4230,13 @@ if($mode -eq "X" -or $mode -eq "x"){
 }
 
 if($mode -in @('J','j')){
-    Show-OgdPre778FixMenu
+    Show-OgdPre798FixMenu
     continue MenuLoop
 }
 
 # Gestione opzione 0 (Esci)
 if($mode -eq "0"){
-    Write-Host "`n  👋 Uscita script..." -F Yellow
+    Write-Host "`n  Uscita script..." -F Yellow
     exit
 }
 
@@ -4066,20 +4248,26 @@ if($mode -in @("A","a")){
 
     Write-Host "`n  Scegli il livello in base alla potenza del tuo PC:`n" -F Cyan
 
-    Write-Host "  [L] 🟢 LIGHT GAMING - Gaming base, safe su qualsiasi PC" -F Green
+    Write-Host "  [L] LIGHT GAMING - Gaming base, safe su qualsiasi PC" -F Green
     Write-Host "      Game Mode ON, DVR OFF, Timer, Process priority gaming" -F DarkGray
     Write-Host "      Consigliato: tutti | PC entry-level e mid-range`n" -F DarkGray
 
-    Write-Host "  [N] 🟡 NORMALE GAMING - Gaming completo (raccomandato)" -F Yellow
+    Write-Host "  [N] NORMALE GAMING - Gaming completo (raccomandato)" -F Yellow
     Write-Host "      Light + MMCSS gaming, Power max, CPU boost, Fullscreen ottimizzato" -F DarkGray
     Write-Host "      Consigliato: gaming PC | Da 8GB RAM in su`n" -F DarkGray
 
-    Write-Host "  [F] 🔴 FULL GAMING - Massimo assoluto (solo PC potenti)" -F Magenta
+    Write-Host "  [F] FULL GAMING - Massimo assoluto (solo PC potenti)" -F Magenta
         Write-Host "      Normale + scheduler, MMCSS, storage e servizi secondari in modalita piu spinta" -F DarkGray
         Write-Host "      Nessun overclock, niente HPET tweak e niente RAM tuning sperimentale" -F DarkGray
         Write-Host "      Consigliato: PC alta potenza | 16GB+ RAM | Solo desktop ben stabile`n" -F DarkGray
+    Write-Host "  [R] ROLLBACK DEFAULT - Riporta il sistema ai default Windows`n" -F White
 
-    $agl = Read-Host "  Livello (L/N/F)"
+    $agl = Read-Host "  Livello (L/N/F/R)"
+    if($agl -in @("R","r")){
+        Invoke-OgdFullRollbackToDefault -ProfileLabel 'AGGRESSIVO GAMING' | Out-Null
+        Read-Host "  INVIO per continuare" | Out-Null
+        continue MenuLoop
+    }
     if($agl -notin @("L","l","N","n","F","f")){
         Write-Host "  Scelta non valida" -F Red; Start-Sleep 1; continue MenuLoop
     }
@@ -4097,26 +4285,32 @@ if($mode -in @("4","5")){
 
     Write-Host "`n  Scegli il livello di ottimizzazione:`n" -F Cyan
 
-    Write-Host "  [L] 🟢 LIGHT - Base sicuro, batteria preservata" -F Green
+    Write-Host "  [L] LIGHT - Base sicuro, batteria preservata" -F Green
     Write-Host "      Timer + Privacy + rete base + GPU" -F DarkGray
     Write-Host "      Impatto batteria: Minimo | Performance: +5%`n" -F DarkGray
 
-    Write-Host "  [N] 🟡 NORMALE - Bilanciato performance/batteria" -F Yellow
+    Write-Host "  [N] NORMALE - Bilanciato performance/batteria" -F Yellow
     Write-Host "      Light + Process priority + Debloat + Visual" -F DarkGray
     Write-Host "      Impatto batteria: Leggero | Performance: +10%`n" -F DarkGray
 
-    Write-Host "  [A] 🔴 ALTO - Performance elevata (consigliato in carica)" -F Red
+    Write-Host "  [A] ALTO - Performance elevata (consigliato in carica)" -F Red
         Write-Host "      Normale + High Perf plan + MMCSS + scheduler prudente per laptop" -F DarkGray
     Write-Host "      Impatto batteria: Medio | Performance: +15%`n" -F DarkGray
 
-    Write-Host "  [U] ⚡ ULTRA - Massima performance (solo in carica)" -F Magenta
+    Write-Host "  [U] ULTRA - Massima performance (solo in carica)" -F Magenta
     Write-Host "      Alto + CPU Boost + Memory + C-states ridotti" -F DarkGray
     if($isGamingLaptop){
         Write-Host "      + USB suspend OFF + Game Mode + priorita gaming in carica" -F DarkGray
     }
-    Write-Host "      ⚠️  Riduce autonomia batteria — usa solo in carica`n" -F Yellow
+      Write-Host "      Riduce autonomia batteria - usa solo in carica`n" -F Yellow
+    Write-Host "  [R] ROLLBACK DEFAULT - Riporta il sistema ai default Windows`n" -F White
 
-    $ll = Read-Host "  Livello (L/N/A/U)"
+    $ll = Read-Host "  Livello (L/N/A/U/R)"
+    if($ll -in @("R","r")){
+        Invoke-OgdFullRollbackToDefault -ProfileLabel $ltTitle | Out-Null
+        Read-Host "  INVIO per continuare" | Out-Null
+        continue MenuLoop
+    }
     if($ll -notin @("L","l","N","n","A","a","U","u")){
         Write-Host "  Scelta non valida" -F Red; Start-Sleep 1; continue MenuLoop
     }
@@ -4132,15 +4326,15 @@ if($mode -in @("W","w")){
     Write-Host "  │ 🔧 RIPARAZIONE E PULIZIA SISTEMA                       │" -F Cyan
     Write-Host "  └─────────────────────────────────────────────────────────┘`n" -F Cyan
     
-    Write-Host "  [1] 🔄 RESET WINDOWS UPDATE - Fix errori aggiornamenti" -F Green
-    Write-Host "  [2] 🩹 REPAIR IMAGE - DISM + SFC (10-30 min)" -F Yellow
-    Write-Host "  [3] 🏪 STORE RESET - Reset Microsoft Store" -F Cyan
-    Write-Host "  [4] 🌐 NETWORK RESET - Reset stack rete" -F Magenta
-    Write-Host "  [5] 🧹 CLEAN BASIC - Pulizia temp/cache base" -F White
-    Write-Host "  [6] 🧽 CLEAN ADVANCED - Pulizia aggressiva DISM" -F Red
-    Write-Host "  [7] ❌ DISABLE RECALL - Disabilita Recall (Win11)" -F Yellow
-    Write-Host "  [A] 🚀 ALL - Esegui tutto (1+2+3+4)" -F Green
-    Write-Host "  [0] ⏭️  SALTA - Torna ai tweaks`n" -F White
+    Write-Host "  [1] RESET WINDOWS UPDATE - Fix errori aggiornamenti" -F Green
+    Write-Host "  [2] REPAIR IMAGE - DISM + SFC (10-30 min)" -F Yellow
+    Write-Host "  [3] STORE RESET - Reset Microsoft Store" -F Cyan
+    Write-Host "  [4] NETWORK RESET - Reset stack rete" -F Magenta
+    Write-Host "  [5] CLEAN BASIC - Pulizia temp/cache base" -F White
+    Write-Host "  [6] CLEAN ADVANCED - Pulizia aggressiva DISM" -F Red
+    Write-Host "  [7] DISABLE RECALL - Disabilita Recall (Win11)" -F Yellow
+    Write-Host "  [A] ALL - Esegui tutto (1+2+3+4)" -F Green
+    Write-Host "  [0] SALTA - Torna ai tweaks`n" -F White
     
     $revive=Read-Host "  Scelta"
     
@@ -5267,7 +5461,7 @@ if($mode -eq "9"){
     Show-Banner;Write-Section "RESET SISTEMA"
     Write-Host "`n  RIPRISTINO:" -F Cyan
     Write-Host "  1. F8 al boot → Ripristino sistema" -F White
-Write-Host "  2. Seleziona: 'OGD WinCaffè v8.0.10'`n" -F White
+Write-Host "  2. Seleziona: 'OGD WinCaffe NEXT v8.0.10'`n" -F White
     Read-Host "  INVIO";continue MenuLoop
 }
 
@@ -5296,7 +5490,7 @@ if($mode -in @("F","f")){
     $createRestore = Read-Host "  Creare punto ripristino Windows? (S/N)"
     if($createRestore -in @("S","s")){
         # Punto ripristino
-$desc="OGD WinCaffè v8.0.10 FILE I/O - $(Get-Date -Format 'dd/MM/yyyy HH:mm')"
+$desc="OGD WinCaffe NEXT v8.0.10 FILE I/O - $(Get-Date -Format 'dd/MM/yyyy HH:mm')"
         New-OgdRestorePoint -Description $desc
     }
     
@@ -7039,6 +7233,33 @@ if($mode -in @('Q','q')){
     continue MenuLoop
 }
 
+if($mode -in @("1","2","3")){
+    $profileLabel = switch($mode){
+        "1" { "LIGHT" }
+        "2" { "NORMALE" }
+        "3" { "AGGRESSIVO" }
+    }
+    Show-Banner
+    Write-Section ("AZIONE PROFILO {0}" -f $profileLabel)
+    Write-Host "  [A] APPLICA - Esegue il profilo selezionato" -F Green
+    Write-Host "  [R] ROLLBACK DEFAULT - Riporta il sistema ai default Windows" -F Yellow
+    Write-Host "  [0] TORNA INDIETRO`n" -F DarkGray
+    $profileAction = Read-Host "  Scelta (A/R/0)"
+    if($profileAction -in @('R','r')){
+        Invoke-OgdFullRollbackToDefault -ProfileLabel $profileLabel | Out-Null
+        Read-Host "  INVIO per continuare" | Out-Null
+        continue MenuLoop
+    }
+    if($profileAction -in @('0')){
+        continue MenuLoop
+    }
+    if($profileAction -notin @('A','a')){
+        Write-Warning 'Scelta non valida'
+        Start-Sleep 1
+        continue MenuLoop
+    }
+}
+
 if($mode -in @("1","2","3","A","a","4","5","B","b")){
 
     # ── Flag livelli desktop ─────────────────────────────────────────────────
@@ -8668,7 +8889,7 @@ while($true){
     Write-Host "  3. OGD_Timer_0.5ms.ps1 resta opzionale: usalo solo per confronto pratico, non come boost garantito`n" -F White
     Write-Info "Punto ripristino disponibile in: Impostazioni → Ripristino sistema"
     Write-Host "`n  ════════════════════════════════════════════════════" -F Cyan
-Write-Host "   OGD WinCaffè v8.0.10" -F Yellow
+Write-Host "   OGD WinCaffe NEXT v8.0.10" -F Yellow
     Write-Host "   #DarkPlayer84Tv Productions" -F Green
     Write-Host "   by OldGamerDarthy Official" -F Green
     Write-Host "  ════════════════════════════════════════════════════`n" -F Cyan
