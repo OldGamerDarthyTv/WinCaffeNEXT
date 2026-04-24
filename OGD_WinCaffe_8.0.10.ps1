@@ -46,14 +46,45 @@ Nota versione: 8.0.10 e una release provvisoria di fix/transizione al posto di 8
 ═══════════════════════════════════════════════════════════════════════════════
 #>
 
+param(
+    [string]$WizardSetupChoice = '',
+    [string]$WizardTargetFamily = '',
+    [string]$WizardTargetRelease = '',
+    [string]$WizardPcType = '',
+    [string]$WizardMenuChoice = '',
+    [switch]$WizardSkipDiscord,
+    [switch]$WizardAcceptTerms,
+    [switch]$WizardSkipOpenDyslexic
+)
+
+$script:OgdLaunchParameters = @{} + $PSBoundParameters
+$script:OgdWizardMenuChoiceConsumed = $false
+
+function Get-OgdSelfInvocationArgs {
+    $args = @('-NoProfile','-ExecutionPolicy','Bypass','-File',$PSCommandPath)
+    foreach($entry in $script:OgdLaunchParameters.GetEnumerator()){
+        if($entry.Value -is [switch]){
+            if($entry.Value.IsPresent){
+                $args += ('-' + $entry.Key)
+            }
+            continue
+        }
+        if($null -ne $entry.Value -and -not [string]::IsNullOrWhiteSpace([string]$entry.Value)){
+            $args += ('-' + $entry.Key)
+            $args += [string]$entry.Value
+        }
+    }
+    return $args
+}
+
 # Admin check
 if(-not([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator")){
     # Preferisci pwsh se disponibile
     $pwshExe=Get-Command pwsh -EA SilentlyContinue
     if($pwshExe){
-        Start-Process -FilePath $pwshExe.Source -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',$PSCommandPath) -Verb RunAs;exit
+        Start-Process -FilePath $pwshExe.Source -ArgumentList (Get-OgdSelfInvocationArgs) -Verb RunAs;exit
     }else{
-        Start-Process -FilePath 'powershell' -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',$PSCommandPath) -Verb RunAs;exit
+        Start-Process -FilePath 'powershell' -ArgumentList (Get-OgdSelfInvocationArgs) -Verb RunAs;exit
     }
 }
 
@@ -102,7 +133,16 @@ function Select-OgdWindowsProfileTarget {
         Write-Host "  Target consigliato: Windows $detectedFamily - $defaultRelease`n" -F DarkGray
         Write-Host "  [1] Windows 11" -F Green
         Write-Host "  [2] Windows 10`n" -F Yellow
-        $famChoice = Read-Host "  Quale famiglia Windows vuoi ottimizzare? (1/2)"
+        $famChoice = if($WizardTargetFamily -eq '11'){
+            '1'
+        } elseif($WizardTargetFamily -eq '10'){
+            '2'
+        } else {
+            Read-Host "  Quale famiglia Windows vuoi ottimizzare? (1/2)"
+        }
+        if($WizardTargetFamily){
+            Write-Host ("  > Wizard GUI: selezione automatica famiglia Windows {0}" -f $WizardTargetFamily) -F DarkGray
+        }
         switch($famChoice){
             '1' {
                 $script:OgdTargetWindowsFamily = '11'
@@ -133,7 +173,15 @@ function Select-OgdWindowsProfileTarget {
             Write-Host "  [1] Windows 11 25H2 o successivo" -F Green
             Write-Host "  [2] Windows 11 24H2" -F Cyan
             Write-Host "  [3] Windows 11 pre-24H2`n" -F Yellow
-            $relChoice = Read-Host "  Seleziona il ramo Windows 11 (1/2/3)"
+            $relChoice = switch($WizardTargetRelease){
+                '25H2+' { '1' }
+                '24H2' { '2' }
+                'Pre-24H2' { '3' }
+                default { Read-Host "  Seleziona il ramo Windows 11 (1/2/3)" }
+            }
+            if($WizardTargetRelease){
+                Write-Host ("  > Wizard GUI: selezione automatica release {0}" -f $WizardTargetRelease) -F DarkGray
+            }
             switch($relChoice){
                 '1' { $script:OgdTargetWindowsRelease = '25H2+'; $releaseSelected = $true }
                 '2' { $script:OgdTargetWindowsRelease = '24H2'; $releaseSelected = $true }
@@ -143,7 +191,14 @@ function Select-OgdWindowsProfileTarget {
         } else {
             Write-Host "  [1] Windows 10 22H2" -F Green
             Write-Host "  [2] Windows 10 pre-22H2`n" -F Yellow
-            $relChoice = Read-Host "  Seleziona il ramo Windows 10 (1/2)"
+            $relChoice = switch($WizardTargetRelease){
+                '22H2' { '1' }
+                'Pre-22H2' { '2' }
+                default { Read-Host "  Seleziona il ramo Windows 10 (1/2)" }
+            }
+            if($WizardTargetRelease){
+                Write-Host ("  > Wizard GUI: selezione automatica release {0}" -f $WizardTargetRelease) -F DarkGray
+            }
             switch($relChoice){
                 '1' { $script:OgdTargetWindowsRelease = '22H2'; $releaseSelected = $true }
                 '2' { $script:OgdTargetWindowsRelease = 'Pre-22H2'; $releaseSelected = $true }
@@ -176,7 +231,15 @@ function Select-OgdPcType {
         Write-Host "  [1] Desktop" -F Green
         Write-Host "  [2] Laptop" -F Yellow
         Write-Host "  [3] Laptop Gaming`n" -F Magenta
-        $pcChoice = Read-Host "  Quale tipo di PC vuoi ottimizzare? (1/2/3)"
+        $pcChoice = switch($WizardPcType){
+            '1' { '1' }
+            '2' { '2' }
+            '3' { '3' }
+            default { Read-Host "  Quale tipo di PC vuoi ottimizzare? (1/2/3)" }
+        }
+        if($WizardPcType){
+            Write-Host ("  > Wizard GUI: selezione automatica tipo PC {0}" -f $WizardPcType) -F DarkGray
+        }
         switch($pcChoice){
             '1' {
                 $script:OgdPcType = 'Desktop'
@@ -705,13 +768,13 @@ Write-Host "  ══════════════════════
 
 Write-Host "  COMMUNITY & SUPPORTO:" -F Cyan
 Write-Host "     Discord OGD: https://discord.gg/5SJa2xp5" -F White
-$discordChoice = Read-Host "  Vuoi aprire il server Discord? (S/N)"
+$discordChoice = if($WizardSkipDiscord){ 'N' } else { Read-Host "  Vuoi aprire il server Discord? (S/N)" }
 if($discordChoice -in @("S","s")){
     Start-Process "https://discord.gg/5SJa2xp5"
     Write-Host "  ✓ Browser aperto — benvenuto nel server!`n" -F Green
 }
 
-$accept=Read-Host "  Accetti i termini e vuoi proseguire? (S/N)"
+$accept = if($WizardAcceptTerms){ 'S' } else { Read-Host "  Accetti i termini e vuoi proseguire? (S/N)" }
 
 if($accept -notin @("S","s")){
     Write-Host "`n  Script terminato. Grazie!`n" -F Yellow
@@ -727,7 +790,7 @@ function Invoke-OgdPowerShellRuntimeCheck {
     if(-not $runningOnPwsh -and $pwshExe){
         Write-Host "`n  ℹ Runtime consigliato rilevato dopo l'accettazione: PowerShell 7.6.0+" -F Cyan
         Write-Host "  → Rilancio automatico in pwsh: $($pwshExe.Source)`n" -F DarkGray
-        Start-Process -FilePath $pwshExe.Source -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',$PSCommandPath) -Verb RunAs
+        Start-Process -FilePath $pwshExe.Source -ArgumentList (Get-OgdSelfInvocationArgs) -Verb RunAs
         exit
     }
 
@@ -743,7 +806,7 @@ function Invoke-OgdPowerShellRuntimeCheck {
                 Write-Host "  ✓ PowerShell 7.6.0 installato!" -F Green
                 Write-Host "`n  Riavvio script con PowerShell 7.6.0...`n" -F Yellow
                 Start-Sleep 2
-                Start-Process -FilePath 'pwsh' -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',$PSCommandPath) -Verb RunAs
+                Start-Process -FilePath 'pwsh' -ArgumentList (Get-OgdSelfInvocationArgs) -Verb RunAs
                 exit
             }else{
                 Write-Host "  ⚠ Installazione fallita. Continuo con PS $($psVersion.Major).$($psVersion.Minor) come fallback" -F Yellow
@@ -765,7 +828,7 @@ function Invoke-OgdPowerShellRuntimeCheck {
                 Write-Host "  ✓ PowerShell 7.6.0 aggiornato!" -F Green
                 Write-Host "`n  Riavvio script con nuova versione...`n" -F Yellow
                 Start-Sleep 2
-                Start-Process -FilePath 'pwsh' -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',$PSCommandPath) -Verb RunAs
+                Start-Process -FilePath 'pwsh' -ArgumentList (Get-OgdSelfInvocationArgs) -Verb RunAs
                 exit
             }else{
                 Write-Host "  ⚠ Aggiornamento fallito. Continuo con PS $($psVersion.Major).$($psVersion.Minor)" -F Yellow
@@ -833,6 +896,7 @@ function Get-OgdOfficialRepoScriptCandidates {
                 $candidates += [pscustomobject]@{
                     Name        = $item.name
                     Version     = $Matches['ver']
+                    Sha         = $item.sha
                     DownloadUrl = $item.download_url
                     HtmlUrl     = $item.html_url
                 }
@@ -871,6 +935,51 @@ function Get-OgdCurrentScriptVersion {
     return $FallbackVersion
 }
 
+function Get-OgdGitBlobHash {
+    param([string]$Path)
+    try{
+        if([string]::IsNullOrWhiteSpace($Path) -or -not (Test-Path $Path)){ return '' }
+        $contentBytes = [System.IO.File]::ReadAllBytes($Path)
+        $prefixBytes = [System.Text.Encoding]::UTF8.GetBytes(("blob {0}`0" -f $contentBytes.Length))
+        $allBytes = New-Object byte[] ($prefixBytes.Length + $contentBytes.Length)
+        [Array]::Copy($prefixBytes, 0, $allBytes, 0, $prefixBytes.Length)
+        [Array]::Copy($contentBytes, 0, $allBytes, $prefixBytes.Length, $contentBytes.Length)
+        $sha1 = [System.Security.Cryptography.SHA1]::Create()
+        try{
+            return ([System.BitConverter]::ToString($sha1.ComputeHash($allBytes))).Replace('-', '').ToLowerInvariant()
+        } finally {
+            $sha1.Dispose()
+        }
+    }catch{
+        return ''
+    }
+}
+
+function Test-OgdOfficialRepoUpdateNeeded {
+    param(
+        [psobject]$Latest,
+        [string]$CurrentVersion,
+        [string]$CurrentScriptPath
+    )
+    if($null -eq $Latest){
+        return [pscustomobject]@{ Needed = $false; Reason = ''; LocalSha = ''; RemoteSha = '' }
+    }
+
+    $versionCompare = Compare-OgdVersions -LeftVersion $Latest.Version -RightVersion $CurrentVersion
+    $localSha = Get-OgdGitBlobHash -Path $CurrentScriptPath
+    $remoteSha = [string]$Latest.Sha
+
+    if($versionCompare -gt 0){
+        return [pscustomobject]@{ Needed = $true; Reason = 'version'; LocalSha = $localSha; RemoteSha = $remoteSha }
+    }
+
+    if($versionCompare -eq 0 -and -not [string]::IsNullOrWhiteSpace($localSha) -and -not [string]::IsNullOrWhiteSpace($remoteSha) -and $localSha -ne $remoteSha){
+        return [pscustomobject]@{ Needed = $true; Reason = 'content'; LocalSha = $localSha; RemoteSha = $remoteSha }
+    }
+
+    return [pscustomobject]@{ Needed = $false; Reason = ''; LocalSha = $localSha; RemoteSha = $remoteSha }
+}
+
 function Invoke-OgdOfficialRepoUpdateCheck {
     param(
         [string]$CurrentVersion,
@@ -879,15 +988,24 @@ function Invoke-OgdOfficialRepoUpdateCheck {
 
     $latest = Get-OgdLatestOfficialScript
     if($null -eq $latest){ return }
-    if((Compare-OgdVersions -LeftVersion $latest.Version -RightVersion $CurrentVersion) -le 0){ return }
+    $updateState = Test-OgdOfficialRepoUpdateNeeded -Latest $latest -CurrentVersion $CurrentVersion -CurrentScriptPath $PSCommandPath
+    if(-not $updateState.Needed){ return }
 
     Clear-Host
     Write-Host "`n  🔄 AGGIORNAMENTO UFFICIALE DISPONIBILE`n" -F Yellow
     Write-Host "  Installata: v$CurrentVersion" -F White
     Write-Host "  Disponibile: v$($latest.Version)" -F Green
+    if($updateState.Reason -eq 'content'){
+        Write-Host "  Rilevato reupload/rebuild: stesso numero versione ma contenuto aggiornato nel repo ufficiale." -F Cyan
+    }
     Write-Host "  Repo ufficiale: $((Get-OgdOfficialRepoMetadata).HtmlRoot)`n" -F DarkGray
 
-    if((Read-Host "  Scaricare e aggiornare lo script dalla versione ufficiale disponibile? (S/N)") -notin @('S','s')){
+    $prompt = if($updateState.Reason -eq 'content'){
+        "  Scaricare il reupload più recente anche se la versione è invariata? (S/N)"
+    } else {
+        "  Scaricare e aggiornare lo script dalla versione ufficiale disponibile? (S/N)"
+    }
+    if((Read-Host $prompt) -notin @('S','s')){
         return
     }
 
@@ -1138,7 +1256,7 @@ if($odStatusStartup.FullyInstalled -and $odStatusStartup.FullyRegistered){
 }
 
 $script:OpenDyslexicManagerRequestedAtStartup = $false
-$odChoice = Read-Host '  Aprire il gestore OpenDyslexic adesso? (solo se ti serve accessibilità o vuoi rimuoverlo) (S/N)'
+$odChoice = if($WizardSkipOpenDyslexic){ 'N' } else { Read-Host '  Aprire il gestore OpenDyslexic adesso? (solo se ti serve accessibilità o vuoi rimuoverlo) (S/N)' }
 if($odChoice -in @('S','s')){
     $script:OpenDyslexicManagerRequestedAtStartup = $true
 }
@@ -1158,7 +1276,12 @@ Write-Host "`n  [2] DISINSTALLA - Rimuovi comando 'wincaffe'" -F Red
 Write-Host "      Pulisce tutto (script + profilo PowerShell)" -F DarkGray
 Write-Host "`n  [3] ESEGUI - Avvia normalmente (senza installare)`n" -F Yellow
 
-$setupChoice=Read-Host "  Scelta (1/2/3)"
+$setupChoice = if($WizardSetupChoice -in @('1','2','3')){
+    Write-Host ("  > Wizard GUI: selezione automatica setup {0}" -f $WizardSetupChoice) -F DarkGray
+    $WizardSetupChoice
+} else {
+    Read-Host "  Scelta (1/2/3)"
+}
 
 if($setupChoice -eq "1"){
     # INSTALLAZIONE
@@ -4201,7 +4324,13 @@ Write-Host "  [K] SSD & NVME SUPER TWEAKS - Safe storage boost per SSD e NVMe" -
 Write-Host "  [H] HOTFIX 8.0.10 - DX9 legacy + OpenDyslexic + NPU diag" -F Cyan
 Write-Host "  [0] ESCI - Chiudi script`n" -F Red
 
-$mode=Read-Host "  Scelta (1-9/A/B/F/U/W/N/G/R/X/I/L/P/E/C/M/D/H/J/Q/T/K/Y/Z/0)"
+$mode = if(-not $script:OgdWizardMenuChoiceConsumed -and -not [string]::IsNullOrWhiteSpace($WizardMenuChoice)){
+    $script:OgdWizardMenuChoiceConsumed = $true
+    Write-Host ("  > Wizard GUI: avvio automatico menu [{0}]" -f $WizardMenuChoice.ToUpper()) -F DarkGray
+    $WizardMenuChoice.ToUpper()
+} else {
+    Read-Host "  Scelta (1-9/A/B/F/U/W/N/G/R/X/I/L/P/E/C/M/D/H/J/Q/T/K/Y/Z/0)"
+}
 
 
 if($mode -in @('H','h')){
