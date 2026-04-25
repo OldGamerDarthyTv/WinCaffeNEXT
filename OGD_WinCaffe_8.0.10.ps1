@@ -1495,7 +1495,7 @@ function Show-Banner {
     Write-Host "  | PROFILES | GAMING | DEVICES | REPAIR | NETWORK | SUPPORT          |" -F Black -BackgroundColor White
     Write-Host "  +--------------------------------------------------------------------+" -F DarkGray
     Write-Host "  | STATUS : READY                                                     |" -F Cyan
-    $targetLabel = (Get-OgdTargetLabel).PadRight(52)
+    $targetLabel = (Get-OgdTargetLabel).PadRight(58)
     Write-Host "  | TARGET : $targetLabel|" -F White
     Write-Host "  | PATH   : [2] NORMALE   [A] GAMING   [Y] WIN11   [H] HOTFIX        |" -F Yellow
     Write-Host "  +--------------------------------------------------------------------+`n" -F DarkGray
@@ -1508,7 +1508,7 @@ function Show-Steam {
 function Write-Section([string]$T){
     Write-Host ""
     Write-Host "  +--------------------------------------------------------------------+" -F DarkGray
-    Write-Host ("  | {0}" -f $T.ToUpper().PadRight(66)) -F Black -BackgroundColor Gray
+    Write-Host ("  | {0} |" -f $T.ToUpper().PadRight(66)) -F Black -BackgroundColor Gray
     Write-Host "  +--------------------------------------------------------------------+" -F DarkGray
 }
 
@@ -3847,105 +3847,6 @@ Write-Host "  ║              8.0.10 HOTFIX & ACCESSIBILITÀ             ║" -
     }
 }
 
-function Invoke-OgdPre778Repair {
-    param([switch]$CreateRestorePoint)
-
-    if($CreateRestorePoint){
-$desc = "OGD WinCaffe v8.0.10 PRE-FIX - $(Get-Date -Format 'dd/MM/yyyy HH:mm')"
-        New-OgdRestorePoint -Description $desc
-    }
-
-    Write-Host ""
-Write-Info "Bonifica impostazioni legacy pre-8.0.10..."
-
-    bcdedit /deletevalue useplatformclock    2>$null | Out-Null
-    bcdedit /deletevalue disabledynamictick  2>$null | Out-Null
-    bcdedit /deletevalue tscsyncpolicy       2>$null | Out-Null
-    bcdedit /deletevalue x2apicpolicy        2>$null | Out-Null
-    Write-Success "Clock/timer low-level: riportati a gestione nativa"
-
-    $pt = "HKLM:\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling"
-    if(!(Test-Path $pt)){ New-Item $pt -Force -EA SilentlyContinue | Out-Null }
-    Set-ItemProperty $pt -Name "PowerThrottlingOff" -Value 0 -Type DWord -Force -EA SilentlyContinue
-    Write-Success "Power Throttling: gestione nativa ripristinata"
-
-    $mm = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management"
-    Set-ItemProperty $mm -Name "DisablePagingExecutive" -Value 0 -Type DWord -Force -EA SilentlyContinue
-    Set-ItemProperty $mm -Name "LargeSystemCache" -Value 0 -Type DWord -Force -EA SilentlyContinue
-    Remove-ItemProperty -Path $mm -Name "NonPagedPoolSize" -Force -EA SilentlyContinue
-    Remove-ItemProperty -Path $mm -Name "SessionViewSize" -Force -EA SilentlyContinue
-    Write-Success "Memory management: rimesso su valori sicuri e dinamici"
-
-    $pp = "$mm\PrefetchParameters"
-    if(!(Test-Path $pp)){ New-Item $pp -Force -EA SilentlyContinue | Out-Null }
-    Set-ItemProperty $pp -Name "EnableSuperfetch" -Value 3 -Type DWord -Force -EA SilentlyContinue
-    Set-ItemProperty $pp -Name "EnablePrefetcher" -Value 3 -Type DWord -Force -EA SilentlyContinue
-    Write-Success "SysMain/Prefetch: profilo standard prudente ripristinato"
-
-    try{
-        Set-Service "WSearch" -StartupType Manual -EA SilentlyContinue
-    }catch{}
-    Write-Success "Windows Search: riportato su manuale"
-
-    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance" /v "MaintenanceDisabled" /t REG_DWORD /d 0 /f 2>$null|Out-Null
-    Enable-ScheduledTask -TaskName "\Microsoft\Windows\TaskScheduler\Regular Maintenance"      -EA SilentlyContinue | Out-Null
-    Enable-ScheduledTask -TaskName "\Microsoft\Windows\TaskScheduler\Maintenance Configurator" -EA SilentlyContinue | Out-Null
-    Write-Success "Manutenzione automatica: riattivata"
-
-    reg add "HKLM\SOFTWARE\Microsoft\Windows\Windows Error Reporting" /v "Disabled" /t REG_DWORD /d 0 /f 2>$null|Out-Null
-    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting" /v "Disabled" /t REG_DWORD /d 0 /f 2>$null|Out-Null
-    Write-Success "Windows Error Reporting: riattivato"
-
-    reg add "HKLM\SYSTEM\CurrentControlSet\Services\hpet" /v "Start" /t REG_DWORD /d 3 /f 2>$null|Out-Null
-    Write-Success "HPET service: riportato a stato prudente"
-
-    Write-Host ""
-Write-Success "Fix pre-8.0.10 completato"
-}
-
-function Show-OgdPre778FixMenu {
-    while($true){
-        Clear-Host
-        Write-Host "`n  ╔═══════════════════════════════════════════════════════╗" -F Cyan
-        Write-Host "  ║                FIX PRE 8.0.10 - BONIFICA              ║" -F Cyan
-        Write-Host "  ╚═══════════════════════════════════════════════════════╝`n" -F Cyan
-        Show-OgdAppliedSummary 'FIXPRE778'
-        Write-MenuHint 'Usa questo menu se hai applicato versioni precedenti molto aggressive o se il PC e peggiorato dopo vecchi tweak.' @(
-            'non aumenta direttamente gli FPS: prima ripulisce il sistema dai tweak rischiosi o teorici',
-            'dopo il fix conviene riapplicare il preset corretto per la tua categoria: [1], [2], [4], [5] o [A]',
-'e pensato come ponte pulito verso il ramo 8.0.10 e i profili moderni successivi'
-        )
-Write-Host '  [1] Mostra cosa corregge il fix pre-8.0.10' -F White
-Write-Host '  [2] Applica il fix pre-8.0.10 subito' -F Yellow
-        Write-Host '  [3] Crea punto ripristino e poi applica il fix' -F Green
-        Write-Host '  [0] Torna al menu`n' -F DarkGray
-        $choice = Read-Host '  Scelta (1/2/3/0)'
-        switch($choice){
-            '1' {
-                Write-Host ""
-                Write-Host "  Questo fix corregge in modo prudente:" -F Cyan
-                Write-Host "    • bcdedit/timer/clock source troppo invasivi" -F DarkGray
-                Write-Host "    • power throttling forzato OFF" -F DarkGray
-                Write-Host "    • tweak RAM/kernel troppo aggressivi" -F DarkGray
-                Write-Host "    • Search, manutenzione e WER disallineati" -F DarkGray
-Write-Host "    • residui legacy poco adatti al ramo 8.0.10" -F DarkGray
-                Read-Host '  INVIO per continuare'
-            }
-            '2' {
-                Invoke-OgdPre778Repair
-                Read-Host '  INVIO per continuare'
-            }
-            '3' {
-                Invoke-OgdPre778Repair -CreateRestorePoint
-                Read-Host '  INVIO per continuare'
-            }
-            '0' { return }
-            default { Write-Warning 'Scelta non valida'; Start-Sleep 1 }
-        }
-    }
-}
-
-
 # ── Crea punto ripristino con timeout job (non blocca lo script) ─────────────
 function New-OgdRestorePoint {
     param([string]$Description)
@@ -3989,15 +3890,19 @@ function Get-OgdNpuInfo {
         Advice        = ''
     }
 
-    $npuPattern = 'Intel(\(R\))? AI Boost|Intel AI Boost|Ryzen AI|Hexagon|Neural|NPU|AI Accelerator|Neural Processor|VPU|IPU|XDNA'
+    $npuPattern = 'Intel(\(R\))? AI Boost|Intel AI Boost|Ryzen AI|Hexagon|AI Accelerator|Neural Processor|VPU|IPU|XDNA|NPU'
+    $npuStrictClassPattern = 'Neural'
+    $npuInvalidPattern = 'Error Aggregation Handler|EAH\b|Aggregation Handler|Crash|Telemetry|Bridge|Controller'
     $cpuCheck = if([string]::IsNullOrWhiteSpace($CpuName)){ (Get-CimInstance Win32_Processor -EA SilentlyContinue | Select-Object -First 1).Name } else { $CpuName }
 
     try{
         $devFast = Get-PnpDevice -Class 'System','ComputerHardwareIds','Processor','SoftwareComponent','SoftwareDevice' -EA SilentlyContinue |
             Where-Object {
-                $_.FriendlyName -match $npuPattern -or
-                $_.Class -match 'Neural' -or
-                $_.InstanceId -match 'VEN_8086&DEV_'
+                (
+                    $_.FriendlyName -match $npuPattern -or
+                    $_.Class -match $npuStrictClassPattern
+                ) -and
+                $_.FriendlyName -notmatch $npuInvalidPattern
             } |
             Sort-Object @{Expression={ if($_.Status -eq 'OK'){0}else{1} }}, FriendlyName
 
@@ -4017,9 +3922,11 @@ function Get-OgdNpuInfo {
         try{
             $ent = Get-CimInstance Win32_PnPEntity -EA SilentlyContinue |
                 Where-Object {
-                    $_.Name -match $npuPattern -or
-                    $_.PNPClass -match 'Neural' -or
-                    $_.DeviceID -match 'VEN_8086&DEV_'
+                    (
+                        $_.Name -match $npuPattern -or
+                        $_.PNPClass -match $npuStrictClassPattern
+                    ) -and
+                    $_.Name -notmatch $npuInvalidPattern
                 } |
                 Sort-Object @{Expression={ if($_.ConfigManagerErrorCode -eq 0){0}else{1} }}, Name
             if($ent){
@@ -4039,9 +3946,11 @@ function Get-OgdNpuInfo {
     try{
         $driverHit = Get-CimInstance Win32_PnPSignedDriver -EA SilentlyContinue |
             Where-Object {
-                $_.DeviceName -match $npuPattern -or
-                $_.DeviceClass -match 'Neural' -or
-                $_.DeviceID -match 'VEN_8086&DEV_'
+                (
+                    $_.DeviceName -match $npuPattern -or
+                    $_.DeviceClass -match $npuStrictClassPattern
+                ) -and
+                $_.DeviceName -notmatch $npuInvalidPattern
             } |
             Select-Object -First 1
         if($driverHit){
@@ -4085,6 +3994,24 @@ function Get-OgdNpuInfo {
         $result.Source      = 'CPU-Qualcomm'
         $result.Name        = 'Qualcomm Hexagon NPU (integrata nella CPU)'
         $result.Advice      = 'La CPU sembra includere una NPU, ma il driver/device non risulta pronto.'
+    }
+
+    $explicitNpuName = ($result.Name -match 'Intel(\(R\))? AI Boost|Intel AI Boost|Ryzen AI|Hexagon|AI Accelerator|Neural Processor|XDNA|NPU')
+    $explicitNpuClass = ($result.PNPClass -match $npuStrictClassPattern)
+    if($result.Present -and (
+        $result.Name -match $npuInvalidPattern -or
+        (($result.PNPClass -match '^System$') -and -not $explicitNpuName -and -not $explicitNpuClass)
+    )){
+        $result.Found = $false
+        $result.Present = $false
+        $result.DriverReady = $false
+        $result.Source = 'none'
+        $result.Name = ''
+        $result.PNPDeviceID = ''
+        $result.PNPClass = ''
+        $result.DriverVersion = ''
+        $result.DriverDate = ''
+        $result.ProblemCode = ''
     }
 
     if($result.Name -match 'Intel|AI Boost' -or $result.Source -match 'Intel'){ $result.Type = 'intel' }
@@ -7362,11 +7289,12 @@ if($mode -in @('Q','q')){
     continue MenuLoop
 }
 
-if($mode -in @("1","2","3")){
+if($mode -in @("1","2","3","B","b")){
     $profileLabel = switch($mode){
         "1" { "LIGHT" }
         "2" { "NORMALE" }
         "3" { "AGGRESSIVO" }
+        {$_ -in @("B","b")} { "BETA 25H2 / 26220.8148" }
     }
     Show-Banner
     Write-Section ("AZIONE PROFILO {0}" -f $profileLabel)
