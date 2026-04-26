@@ -3607,6 +3607,9 @@ function Invoke-OgdFullRollbackToDefault {
     try{ Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient" -Name "EnableMulticast" -EA SilentlyContinue }catch{}
     try{ Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Psched" -Name "NonBestEffortLimit" -EA SilentlyContinue }catch{}
 
+    Write-Info "Ripristino stack USB/HID e risparmio energetico input..."
+    try{ Restore-OgdUsbInputDefaults | Out-Null }catch{}
+
     Write-Info "Ripristino accessibilita font..."
     try{ Disable-OgdOpenDyslexicAsDefault }catch{}
 
@@ -3617,6 +3620,39 @@ function Invoke-OgdFullRollbackToDefault {
         'eventuale sostituzione font OpenDyslexic disattivata per tornare ai font standard'
     )
     Write-Success 'Rollback verso default Windows completato. Riavvia il PC per consolidare il ripristino.'
+    return $true
+}
+
+function Restore-OgdUsbInputDefaults {
+    Write-Info 'Ripristino stack USB/HID a default Windows...'
+
+    foreach($pair in @(
+        @{ Path='HKLM:\SYSTEM\CurrentControlSet\Services\usbhub'; Name='DisableSelectiveSuspend' },
+        @{ Path='HKLM:\SYSTEM\CurrentControlSet\Services\USB';    Name='DisableSelectiveSuspend' },
+        @{ Path='HKLM:\SYSTEM\CurrentControlSet\Services\HidUsb'; Name='AssociatorsLimit' }
+    )){
+        try{ Remove-ItemProperty -Path $pair.Path -Name $pair.Name -Force -EA SilentlyContinue }catch{}
+    }
+
+    foreach($scheme in @('SCHEME_CURRENT','SCHEME_BALANCED')){
+        try{ powercfg /setacvalueindex $scheme 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 1 2>$null | Out-Null }catch{}
+        try{ powercfg /setdcvalueindex $scheme 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 1 2>$null | Out-Null }catch{}
+    }
+    try{ powercfg /setactive SCHEME_CURRENT 2>$null | Out-Null }catch{}
+
+    try{ Set-Service -Name 'hidserv' -StartupType Manual -EA SilentlyContinue }catch{}
+    try{
+        $hidSvc = Get-Service -Name 'hidserv' -EA SilentlyContinue
+        if($hidSvc -and $hidSvc.Status -ne 'Running'){ Start-Service -Name 'hidserv' -EA SilentlyContinue }
+    }catch{}
+
+    try{ pnputil /scan-devices | Out-Null }catch{}
+    Write-Success 'USB/HID: chiavi invasive rimosse, selective suspend riportata a default e rescan dispositivi richiesto'
+    Show-OgdWhatThisDoes 'Ripristino USB/HID: cosa e stato fatto davvero' @(
+        'rimosse le chiavi piu invasive sullo stack USB e HID che potevano lasciare mouse e tastiera in stato incoerente',
+        'USB selective suspend riportata al default Windows nei piani correnti',
+        'richiesto un rescan Plug and Play per ridare una chance immediata a mouse e tastiera senza cambiare porta'
+    )
     return $true
 }
 
@@ -3818,8 +3854,10 @@ Write-Host "  ║              8.0.10 HOTFIX & ACCESSIBILITÀ             ║" -
         Write-Host '      Riporta servizi e componenti utili a Store, installer, .NET Framework e app moderne' -F DarkGray
         Write-Host '  [9] Riabilita completamente Copilot' -F Green
         Write-Host '      Rimuove i blocchi policy; se l app manca apre Microsoft Store per reinstallarla' -F DarkGray
+        Write-Host '  [A] Ripristina stack USB / mouse / tastiera' -F Yellow
+        Write-Host '      Rimuove i tweak USB/HID piu aggressivi e forza un rescan dispositivi' -F DarkGray
         Write-Host '  [0] Torna al menu`n' -F DarkGray
-        $h = Read-Host '  Scelta (1/2/3/4/5/6/7/8/9/0)'
+        $h = Read-Host '  Scelta (1/2/3/4/5/6/7/8/9/A/0)'
         switch($h){
             '1' {
                 if($dx.Healthy){ Write-Success 'DX9 legacy: librerie principali presenti in System32/SysWOW64' }
@@ -3841,6 +3879,8 @@ Write-Host "  ║              8.0.10 HOTFIX & ACCESSIBILITÀ             ║" -
             '7' { Restore-OgdSignInOptions }
             '8' { Restore-OgdAppRuntimeCompatibility }
             '9' { Restore-OgdCopilotFully; Read-Host '  INVIO per continuare' }
+            'A' { Restore-OgdUsbInputDefaults | Out-Null; Read-Host '  INVIO per continuare' }
+            'a' { Restore-OgdUsbInputDefaults | Out-Null; Read-Host '  INVIO per continuare' }
             '0' { return }
             default { Write-Warning 'Scelta non valida'; Start-Sleep 1 }
         }
@@ -5881,19 +5921,18 @@ if($mode -in @("L","l")){
             Write-Success "WSearch: Riabilitato"
         }catch{ Write-Warning "WSearch: Impossibile riabilitare" }
 
-        # Ripristina USB polling
-        reg delete "HKLM\SYSTEM\CurrentControlSet\Services\usbhub" /v "DisableSelectiveSuspend" /f 2>$null|Out-Null
-        reg delete "HKLM\SYSTEM\CurrentControlSet\Services\HidUsb" /v "AssociatorsLimit"        /f 2>$null|Out-Null
+        # Ripristina stack USB/HID
+        Restore-OgdUsbInputDefaults | Out-Null
 
         Write-Host ""
         Write-Host "  ════════════════════════════════════════════════════" -F Green
         Write-Host "   ✓ RESET COMPLETATO — Impostazioni default ripristinate" -F Green
         Show-OgdWhatThisDoes 'Reset DPC: cosa è stato fatto davvero' @(
             'ripristinati piano energetico, bcdedit e servizi principali al comportamento standard',
-            'rimossi i tweak USB/timer più invasivi per tornare a una base pulita'
+            'rimossi i tweak USB/timer piu invasivi per tornare a una base pulita'
         )
         Write-Host "  ════════════════════════════════════════════════════`n" -F Green
-        Write-Host "  ⚠️ Riavvia il PC per applicare il reset completamente`n" -F Yellow
+        Write-Host "  [WARN] Riavvia il PC per applicare il reset completamente`n" -F Yellow
 
         if((Read-Host "  Riavviare ora? (S/N)") -in @("S","s")){ Restart-Computer -Force }
         Read-Host "  INVIO per tornare al menu"
@@ -5932,9 +5971,7 @@ if($mode -in @("L","l")){
         powercfg /setacvalueindex $pg 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 0 2>$null
         powercfg /setdcvalueindex $pg 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 0 2>$null
         powercfg /setactive $pg 2>$null
-        # USB Hub polling
-        reg add "HKLM\SYSTEM\CurrentControlSet\Services\usbhub" /v "DisableSelectiveSuspend" /t REG_DWORD /d 1 /f 2>$null|Out-Null
-        Write-Success "USB Suspend: OFF (no DPC spike da USB)"
+        Write-Success "USB Suspend: OFF lato power plan (senza override aggressivi sullo stack USB)"
 
         Write-Info "[5] Servizi background DPC-pesanti: priorità minima..."
         # SysMain e WSearch causano DPC spike quando scansionano
@@ -8207,11 +8244,7 @@ while($true){
         powercfg /setacvalueindex $pg2 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 0 2>$null
         powercfg /setdcvalueindex $pg2 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 0 2>$null
         powercfg /setactive $pg2 2>$null
-        # Anche via registro per persistenza
-        $usbPath = "HKLM:\SYSTEM\CurrentControlSet\Services\USB"
-        if(!(Test-Path $usbPath)){New-Item $usbPath -Force -EA SilentlyContinue|Out-Null}
-        Set-ItemProperty $usbPath -Name "DisableSelectiveSuspend" -Value 1 -Type DWord -Force -EA SilentlyContinue
-        $global:opts++;Write-Success "USB Selective Suspend: OFF (no freeze mouse/tastiera)"
+        $global:opts++;Write-Success "USB Selective Suspend: OFF lato power plan (senza toccare direttamente lo stack USB)"
         $aggStep++
 
         # ── QoS BANDWIDTH RESERVE = 0% ──────────────────────────────────────
