@@ -2932,6 +2932,93 @@ function Invoke-OgdPre798NetworkDiscordRepair {
     Read-Host "  INVIO per continuare"
 }
 
+function Invoke-OgdNetworkProblemsRepair {
+    param([switch]$CreateRestorePoint)
+
+    Show-Banner
+    Write-Section "FIX PROBLEMI RETE"
+
+    if($CreateRestorePoint){
+        $descNetFix = "OGD WinCaffe NEXT v8.0.10 FIX PROBLEMI RETE - $(Get-Date -Format 'dd/MM/yyyy HH:mm')"
+        New-OgdRestorePoint -Description $descNetFix
+        Write-Host ""
+    }
+
+    Write-Info "[1] Reset completo schede di rete attive..."
+    $adapters = @()
+    try{
+        $adapters = @(Get-NetAdapter -Physical -EA SilentlyContinue | Where-Object { $_.Status -ne 'Disabled' })
+    }catch{}
+    foreach($adapter in $adapters){
+        try{
+            Disable-NetAdapter -Name $adapter.Name -Confirm:$false -EA SilentlyContinue | Out-Null
+            Start-Sleep -Milliseconds 1200
+            Enable-NetAdapter -Name $adapter.Name -Confirm:$false -EA SilentlyContinue | Out-Null
+        }catch{}
+    }
+    if($adapters.Count -gt 0){
+        Write-Success "Schede di rete riavviate: $($adapters.Count)"
+    } else {
+        Write-Warning "Nessuna scheda fisica trovata per riavvio controllato"
+    }
+
+    Write-Info "[2] Comandi di ripristino rete..."
+    try{ ipconfig /flushdns    | Out-Null }catch{}
+    try{ ipconfig /registerdns | Out-Null }catch{}
+    try{ ipconfig /release     | Out-Null }catch{}
+    try{ ipconfig /renew       | Out-Null }catch{}
+    try{ netsh winsock reset   | Out-Null }catch{}
+    Write-Success "Sequenza ipconfig/netsh completata"
+
+    Write-Info "[3] Riavvio servizi rete principali..."
+    foreach($svcName in @('Dnscache','NlaSvc','Dhcp','WlanSvc')){
+        try{
+            $svc = Get-Service -Name $svcName -EA SilentlyContinue
+            if($svc -and $svc.Status -eq 'Running'){ Restart-Service -Name $svcName -Force -EA SilentlyContinue }
+        }catch{}
+    }
+    Write-Success "Servizi rete riavviati dove disponibili"
+
+    Show-OgdWhatThisDoes 'Fix problemi rete: cosa e stato fatto davvero' @(
+        'le schede di rete fisiche attive sono state disattivate e riattivate per forzare una nuova inizializzazione',
+        'eseguiti flushdns, registerdns, release, renew e winsock reset come procedura pratica di ripristino',
+        'riavviati i servizi rete principali per consolidare il recupero della connettivita'
+    )
+    Write-Host ""
+    Write-Host "  Se il problema persiste, dopo questo fix conviene riavviare Windows e ritestare la connessione." -F DarkGray
+    Write-Host ""
+    Read-Host "  INVIO per continuare"
+}
+
+function Show-OgdNetworkProblemsFixMenu {
+    while($true){
+        Show-Banner
+        Write-Section "FIX PROBLEMI RETE"
+        Write-Host "  [1] Mostra cosa fa questo fix" -F White
+        Write-Host "  [2] Applica il reset completo schede + ipconfig/netsh" -F Yellow
+        Write-Host "  [3] Crea punto di ripristino e poi applica" -F Green
+        Write-Host "  [0] Torna indietro`n" -F DarkGray
+        $netFixChoice = Read-Host "  Scelta (1/2/3/0)"
+        switch($netFixChoice){
+            '1' {
+                Write-Host ""
+                Write-Host "  Questo fix esegue una riparazione pratica della rete:" -F Cyan
+                Write-Host "    • reset controllato delle schede di rete attive" -F DarkGray
+                Write-Host "    • ipconfig /flushdns" -F DarkGray
+                Write-Host "    • ipconfig /registerdns" -F DarkGray
+                Write-Host "    • ipconfig /release + /renew" -F DarkGray
+                Write-Host "    • netsh winsock reset" -F DarkGray
+                Write-Host "    • riavvio servizi rete principali" -F DarkGray
+                Read-Host "  INVIO per continuare"
+            }
+            '2' { Invoke-OgdNetworkProblemsRepair }
+            '3' { Invoke-OgdNetworkProblemsRepair -CreateRestorePoint }
+            '0' { return }
+            default { Write-Warning 'Scelta non valida'; Start-Sleep 1 }
+        }
+    }
+}
+
 function Show-OgdPre798FixMenu {
     while($true){
         Show-Banner
@@ -2939,8 +3026,9 @@ function Show-OgdPre798FixMenu {
         Write-Host "  [1] Mostra cosa corregge il fix rete 8.0.9" -F White
         Write-Host "  [2] Applica il fix rete/DNS subito" -F Yellow
         Write-Host "  [3] Crea punto di ripristino e poi applica" -F Green
+        Write-Host "  [4] FIX PROBLEMI RETE - Sotto-menu riparazione completa" -F Cyan
         Write-Host "  [0] Torna al menu`n" -F DarkGray
-        $choice798 = Read-Host "  Scelta (1/2/3/0)"
+        $choice798 = Read-Host "  Scelta (1/2/3/4/0)"
         switch($choice798){
             '1' {
                 Write-Host ""
@@ -2954,6 +3042,7 @@ function Show-OgdPre798FixMenu {
             }
             '2' { Invoke-OgdPre798NetworkDiscordRepair }
             '3' { Invoke-OgdPre798NetworkDiscordRepair -CreateRestorePoint }
+            '4' { Show-OgdNetworkProblemsFixMenu }
             '0' { return }
             default { Write-Warning 'Scelta non valida'; Start-Sleep 1 }
         }
@@ -4273,7 +4362,7 @@ Write-Host "  [F] FILE I/O - Velocizza trasferimenti/installazioni`n" -F White
 Write-Host "  [U] WINGET UPDATE - Aggiorna programmi installati`n" -F White
 
 Write-Host "  [W] WINREVIVE - Riparazione Windows" -F Cyan
-Write-Host "  [N] NET TWEAKS - WiFi + LAN ottimizzazione avanzata" -F Cyan
+Write-Host "  [N] NETWORK - Gestione manuale utente (nessun tweak)" -F Cyan
 Write-Host "  [G] NVIDIA TWEAKS - Ottimizzazione GPU NVIDIA + extra software" -F Green
 Write-Host "  [R] AMD GPU TWEAKS - Ottimizzazione GPU Radeon + extra software" -F Red
 Write-Host "  [X] AMD CPU TWEAKS - Profili CPU Ryzen / X3D + tool utili" -F Magenta
@@ -4382,7 +4471,7 @@ if($mode -in @("4","5")){
     Write-Host "`n  Scegli il livello di ottimizzazione:`n" -F Cyan
 
     Write-Host "  [L] LIGHT - Base sicuro, batteria preservata" -F Green
-    Write-Host "      Timer + Privacy + rete base + GPU" -F DarkGray
+    Write-Host "      Timer + Privacy + GPU (rete lasciata invariata)" -F DarkGray
     Write-Host "      Impatto batteria: Minimo | Performance: +5%`n" -F DarkGray
 
     Write-Host "  [N] NORMALE - Bilanciato performance/batteria" -F Yellow
@@ -5172,46 +5261,7 @@ function Reset-OgdDnsToAutomatic {
 
 function Set-OgdAdaptiveAdapterProfile {
     param([string]$ProfileName)
-    $adapters = Get-OgdActiveNetworkAdapters
-    foreach($a in $adapters){
-        $isWifi = ($a.InterfaceDescription -match 'Wi-Fi|Wireless|WLAN|802\.11')
-        $isLan  = ($a.InterfaceDescription -match 'Ethernet|Gigabit|2\.5G|Realtek|Intel')
-
-        if($isWifi){
-            try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName 'Preferred Band' -DisplayValue 'Prefer 5GHz Band' -EA SilentlyContinue }catch{}
-            try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName 'WMM' -DisplayValue 'Enabled' -EA SilentlyContinue }catch{}
-            switch($ProfileName){
-                'WiFi-Performance' {
-                    try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName 'Power Saving Mode' -DisplayValue 'Maximum Performance' -EA SilentlyContinue }catch{}
-                    try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName 'Roaming Aggressiveness' -DisplayValue '1. Lowest' -EA SilentlyContinue }catch{}
-                    try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName 'U-APSD Support' -DisplayValue 'Disabled' -EA SilentlyContinue }catch{}
-                }
-                'WiFi-Stable' {
-                    try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName 'Power Saving Mode' -DisplayValue 'Maximum Performance' -EA SilentlyContinue }catch{}
-                    try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName 'Roaming Aggressiveness' -DisplayValue '3. Medium' -EA SilentlyContinue }catch{}
-                    try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName 'Interrupt Moderation' -DisplayValue 'Enabled' -EA SilentlyContinue }catch{}
-                }
-            }
-            Write-Success ("Profilo {0} applicato su {1}" -f $ProfileName,$a.Name)
-        }
-
-        if($isLan){
-            try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName 'Receive Side Scaling' -DisplayValue 'Enabled' -EA SilentlyContinue }catch{}
-            switch($ProfileName){
-                'LAN-Performance' {
-                    try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName 'Interrupt Moderation' -DisplayValue 'Disabled' -EA SilentlyContinue }catch{}
-                    try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName 'Energy Efficient Ethernet' -DisplayValue 'Disabled' -EA SilentlyContinue }catch{}
-                    try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName 'Large Send Offload V2 (IPv4)' -DisplayValue 'Disabled' -EA SilentlyContinue }catch{}
-                    try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName 'Large Send Offload V2 (IPv6)' -DisplayValue 'Disabled' -EA SilentlyContinue }catch{}
-                }
-                default {
-                    try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName 'Interrupt Moderation' -DisplayValue 'Enabled' -EA SilentlyContinue }catch{}
-                    try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName 'Energy Efficient Ethernet' -DisplayValue 'Disabled' -EA SilentlyContinue }catch{}
-                }
-            }
-            Write-Success ("Profilo {0} applicato su {1}" -f $ProfileName,$a.Name)
-        }
-    }
+    Write-Info ("Profilo rete {0} non applicato: i tweak adapter sono stati ritirati dal progetto" -f $ProfileName)
 }
 
 function Reset-OgdNetworkStack {
@@ -5309,40 +5359,13 @@ function Show-OgdNetworkLabMenu {
 $networkType="0"
 if($mode -in @("1","2","3","A","a","4","5","B","b")){
     Show-Banner
-    Write-Section "NETWORK OPTIMIZATION"
-    
-    Write-Host "`n  🌐 Vuoi ottimizzare rete WiFi o Ethernet?`n" -F Cyan
-    
-    Write-Host "  [1] 📡 WiFi ONLY - Ottimizzazioni wireless" -F Cyan
-    Write-Host "      • TCP/IP optimization" -F DarkGray
-    Write-Host "      • WiFi power saving OFF" -F DarkGray
-    Write-Host "      • Random MAC addresses OFF" -F DarkGray
-    Write-Host "      • WiFi latency reduction" -F DarkGray
-    Write-Host "      • QoS optimization`n" -F DarkGray
-    
-    Write-Host "  [2] 🔌 ETHERNET ONLY - Ottimizzazioni cablate" -F Green
-    Write-Host "      • TCP/IP optimization" -F DarkGray
-    Write-Host "      • Interrupt moderation" -F DarkGray
-    Write-Host "      • RSS (Receive Side Scaling)" -F DarkGray
-    Write-Host "      • Offload settings (LSO/TSO)" -F DarkGray
-    Write-Host "      • Jumbo Frames (se supportati)" -F DarkGray
-    Write-Host "      • Energy Efficient Ethernet OFF`n" -F DarkGray
-    
-    Write-Host "  [3] 🌐 ENTRAMBI - WiFi + Ethernet" -F Yellow
-    Write-Host "      • Tutte le ottimizzazioni combinate`n" -F DarkGray
-    
-    Write-Host "  [4] 🧪 NETWORK LAB - Test rete, profili adapter e reset" -F Magenta
-    Write-Host "      • DNS lasciati a gestione manuale utente / invariati" -F DarkGray
-    Write-Host "      • Test salvati per confronti futuri e suggerimenti migliori" -F DarkGray
-    Write-Host "      • Reset DNS automatici default / stack rete / profili adapter`n" -F DarkGray
-
-    Write-Host "  [0] ⏭️  SALTA - Nessuna ottimizzazione network`n" -F White
-    
-    $networkType=Read-Host "  Scelta (0-4)"
-    if($networkType -eq "4"){
-        Show-OgdNetworkLabMenu
-        $networkType="0"
-    }
+    Write-Section "NETWORK"
+    Write-Host "`n  La sezione ottimizzazioni rete e stata ritirata." -F Cyan
+    Write-Host "  Da ora WinCaffe NEXT non applica piu tweak WiFi, LAN, TCP/IP o profili scheda." -F White
+    Write-Host "  Se vuoi modificare la rete, fallo manualmente fuori dallo script.`n" -F DarkGray
+    Write-Host "  [0] CONTINUA - Nessuna modifica rete`n" -F White
+    Read-Host "  INVIO per continuare"
+    $networkType="0"
 }
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -5505,7 +5528,7 @@ if($mode -eq "8"){
     Write-Host "`n  🟢 LIGHT:" -F Green
     Write-Host "   1. C-States BALANCED (zero freeze)" -F White
     Write-Host "   2. Timer 0.5ms + Piano Ultimate" -F White
-    Write-Host "   3. Privacy base + Network TCP" -F White
+    Write-Host "   3. Privacy base (rete lasciata invariata)" -F White
     Write-Host "   4. Explorer Boost + cache visualizzazioni" -F White
     Write-Host "   5. GPU Hardware Scheduling`n" -F White
     Write-Host "  🟣 BETA 25H2 / 26220.8148:" -F Magenta
@@ -5992,7 +6015,6 @@ if($mode -in @("L","l")){
         Write-Info "[6] MMCSS: priorità audio massima..."
         $mmPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile"
         Set-ItemProperty $mmPath -Name "SystemResponsiveness"   -Value 0    -Type DWord -Force -EA SilentlyContinue
-        Set-ItemProperty $mmPath -Name "NetworkThrottlingIndex" -Value 0xFFFFFFFF -Type DWord -Force -EA SilentlyContinue
         # Tasks Audio
         $mmAudio = "$mmPath\Tasks\Audio"
         if(!(Test-Path $mmAudio)){New-Item $mmAudio -Force -EA SilentlyContinue|Out-Null}
@@ -6005,9 +6027,8 @@ if($mode -in @("L","l")){
         Set-ItemProperty $mmAudio -Name "SFIO Priority"       -Value "High" -Force   -EA SilentlyContinue
         Write-Success "MMCSS Audio: SystemResponsiveness 0, Priority 6, Clock 10000"
 
-        Write-Info "[7] Network throttling OFF..."
-        netsh int tcp set global autotuninglevel=normal 2>$null|Out-Null
-        Write-Success "TCP AutoTuning: Normal"
+        Write-Info "[7] Nessun tweak rete applicato nel fix DPC"
+        Write-Success "Rete: lasciata invariata per scelta progettuale"
     }
 
     # ── FIX AVANZATO (aggiuntivo) ─────────────────────────────────────────────
@@ -6564,7 +6585,6 @@ Write-Host "  → Il ramo 8.0.10 non forza pagefile o heap tweaks: meglio lascia
         Write-Info "[UE-GAME5] MMCSS gaming + audio priorità per UE..."
         $mmUE = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile"
         Set-ItemProperty $mmUE -Name "SystemResponsiveness"   -Value 0          -Type DWord -Force -EA SilentlyContinue
-        Set-ItemProperty $mmUE -Name "NetworkThrottlingIndex" -Value 0xFFFFFFFF  -Type DWord -Force -EA SilentlyContinue
         $mmTasksUE = "$mmUE\Tasks\Games"
         Set-ItemProperty $mmTasksUE -Name "Priority"            -Value 6     -Type DWord -Force -EA SilentlyContinue
         Set-ItemProperty $mmTasksUE -Name "GPU Priority"        -Value 8     -Type DWord -Force -EA SilentlyContinue
@@ -6624,7 +6644,7 @@ if($mode -in @("C","c")){
     Write-Host "  [1] ⚡ BASE - Priorità processo + overlays OFF (tutti i CoD)" -F Green
     Write-Host "      Safe su qualsiasi titolo CoD`n" -F DarkGray
     Write-Host "  [2] 🌐 NETWORK - Latenza e packet loss (tutti i CoD)" -F Yellow
-    Write-Host "      TCP/IP gaming, QoS, buffer ottimizzato`n" -F DarkGray
+    Write-Host "      Nessun tweak rete: la configurazione rete resta manuale`n" -F DarkGray
     Write-Host "  [3] 🔴 BLACK OPS 7 - Tweaks specifici BO7 (priorità)" -F Red
     Write-Host "      Ottimizzazioni specifiche per BO7 senza tweak nascosti o anti-cheat-risky`n" -F DarkGray
     Write-Host "  [A] 🚀 ALL - Applica tutto (1+2+3)" -F Magenta
@@ -6747,7 +6767,6 @@ if($mode -in @("C","c")){
         Write-Info "[COD4] MMCSS priorità massima per CoD..."
         $mmCoD = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile"
         Set-ItemProperty $mmCoD -Name "SystemResponsiveness"   -Value 0          -Type DWord -Force -EA SilentlyContinue
-        Set-ItemProperty $mmCoD -Name "NetworkThrottlingIndex" -Value 0xFFFFFFFF  -Type DWord -Force -EA SilentlyContinue
         $mmGames = "$mmCoD\Tasks\Games"
         Set-ItemProperty $mmGames -Name "Priority"            -Value 6     -Type DWord -Force -EA SilentlyContinue
         Set-ItemProperty $mmGames -Name "GPU Priority"        -Value 8     -Type DWord -Force -EA SilentlyContinue
@@ -6763,65 +6782,10 @@ if($mode -in @("C","c")){
         Write-Success "USB Selective Suspend: OFF"
     }
 
-    # ── NETWORK: latenza e packet loss ────────────────────────────────────────
+    # ── NETWORK: sezione ritirata ─────────────────────────────────────────────
     if($doCODNet){
-        Write-Info "[COD-NET1] TCP/IP ottimizzato per CoD (server tick 20Hz/64Hz)..."
-
-        # CoD usa UDP — ottimizziamo anche UDP oltre TCP
-        $tcpCoD = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
-        New-ItemProperty $tcpCoD -Name "TCPNoDelay"        -PropertyType DWord -Value 1     -Force -EA SilentlyContinue|Out-Null
-        New-ItemProperty $tcpCoD -Name "TcpAckFrequency"   -PropertyType DWord -Value 1     -Force -EA SilentlyContinue|Out-Null
-        New-ItemProperty $tcpCoD -Name "TcpDelAckTicks"    -PropertyType DWord -Value 0     -Force -EA SilentlyContinue|Out-Null
-        New-ItemProperty $tcpCoD -Name "TcpTimedWaitDelay" -PropertyType DWord -Value 30    -Force -EA SilentlyContinue|Out-Null
-        New-ItemProperty $tcpCoD -Name "MaxUserPort"       -PropertyType DWord -Value 65534 -Force -EA SilentlyContinue|Out-Null
-        # Disable Nagle per UDP-over-TCP (lobby CoD)
-        netsh int tcp set global autotuninglevel=normal          2>$null|Out-Null
-        netsh int tcp set global congestionprovider=ctcp         2>$null|Out-Null
-        netsh int tcp set global ecncapability=disabled          2>$null|Out-Null
-        netsh int tcp set global timestamps=disabled             2>$null|Out-Null
-        netsh int tcp set global nonsackrttresiliency=disabled   2>$null|Out-Null
-        netsh int tcp set global maxsynretransmissions=2         2>$null|Out-Null
-        netsh int tcp set global initialRto=2000                 2>$null|Out-Null
-        netsh int tcp set global rss=enabled                     2>$null|Out-Null
-
-        # QoS: priorità massima per traffico CoD (porta 3074 UDP Battle.net / 30000-45000 UDP)
-        $qosPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\QoS\CoD Gaming"
-        if(!(Test-Path $qosPath)){New-Item $qosPath -Force -EA SilentlyContinue|Out-Null}
-        Set-ItemProperty $qosPath -Name "Version"            -Value "1.0"       -Type String -Force -EA SilentlyContinue
-        Set-ItemProperty $qosPath -Name "Application Name"   -Value "*"          -Type String -Force -EA SilentlyContinue
-        Set-ItemProperty $qosPath -Name "Protocol"           -Value "UDP"        -Type String -Force -EA SilentlyContinue
-        Set-ItemProperty $qosPath -Name "Local Port"         -Value "*"          -Type String -Force -EA SilentlyContinue
-        Set-ItemProperty $qosPath -Name "Remote Port"        -Value "3074"       -Type String -Force -EA SilentlyContinue
-        Set-ItemProperty $qosPath -Name "DSCP Value"         -Value "46"         -Type String -Force -EA SilentlyContinue  # Expedited Forwarding
-        Set-ItemProperty $qosPath -Name "Throttle Rate"      -Value "-1"         -Type String -Force -EA SilentlyContinue
-
-        Write-Success "Network: TCP/IP ottimizzato e QoS prudente per traffico CoD"
-
-        Write-Info "[COD-NET2] Adapter LAN ottimizzato per CoD..."
-        $lanCoD = Get-NetAdapter -Physical | Where-Object{
-            ($_.MediaType -like "*802.3*" -or $_.InterfaceDescription -like "*Ethernet*" -or
-             $_.InterfaceDescription -like "*Gigabit*" -or $_.InterfaceDescription -like "*Realtek*" -or
-             $_.InterfaceDescription -like "*Intel*") -and $_.Status -eq "Up"
-        }
-        if($lanCoD){
-            foreach($a in $lanCoD){
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Interrupt Moderation"         -DisplayValue "Disabled"        -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Energy Efficient Ethernet"    -DisplayValue "Disabled"        -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Flow Control"                 -DisplayValue "Rx & Tx Enabled" -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Receive Buffers"              -DisplayValue "2048"            -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Transmit Buffers"             -DisplayValue "2048"            -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Receive Side Scaling"         -DisplayValue "Enabled"         -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Large Send Offload V2 (IPv4)" -DisplayValue "Disabled"        -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Wake on Magic Packet"         -DisplayValue "Disabled"        -EA SilentlyContinue }catch{}
-            }
-            Write-Success "LAN: Interrupt OFF, EEE OFF, Buffer 2048, RSS ON, LSO OFF"
-        } else {
-            Write-Warning "Nessun adapter LAN attivo trovato"
-        }
-
-        Write-Info "[COD-NET3] Winsock reset prudente..."
-        netsh winsock reset    | Out-Null
-        Write-Success "Winsock reset completato"
+        Write-Info "[COD-NET] Sezione rete ritirata: nessun tweak TCP/IP, QoS o NIC applicato"
+        Write-Success "Rete CoD: lasciata interamente a gestione manuale utente"
     }
 
     # ── BLACK OPS 7 — Tweaks specifici ───────────────────────────────────────
@@ -7115,195 +7079,10 @@ if($mode -in @("D","d")){
 
 if($mode -in @("N","n")){
     Show-Banner
-    Write-Section "NET TWEAKS — WiFi + LAN"
-
-    Write-Host "`n  📡 Ottimizzazione avanzata schede di rete`n" -F Cyan
-    Write-Host "  [1] 📶 WiFi ONLY" -F Cyan
-    Write-Host "  [2] 🔌 LAN ONLY" -F Green
-    Write-Host "  [3] 🌐 ENTRAMBI (consigliato)" -F Yellow
-    Write-Host "  [0] ↩️  Torna al menu`n" -F DarkGray
-
-    $ntChoice = Read-Host "  Scelta (1/2/3/0)"
-    if($ntChoice -eq "0"){ continue MenuLoop }
-
-    $doNTWifi = ($ntChoice -in @("1","3"))
-    $doNTLan  = ($ntChoice -in @("2","3"))
-
-    Write-Host ""
-
-    # ── TCP/IP BASE (sempre) ──────────────────────────────────────────────────
-    Write-Info "TCP/IP stack ottimizzazione..."
-
-    # ── netsh globale ─────────────────────────────────────────────────────────
-    netsh int tcp set global autotuninglevel=normal   2>$null|Out-Null  # TCP Window: normal
-    netsh int tcp set global congestionprovider=ctcp  2>$null|Out-Null  # CTCP (migliore throughput)
-    netsh int tcp set global ecncapability=disabled   2>$null|Out-Null  # ECN: disabled
-    netsh int tcp set global timestamps=disabled      2>$null|Out-Null  # Timestamps: disabled
-    netsh int tcp set global rss=enabled              2>$null|Out-Null  # RSS: enabled
-    netsh int tcp set global rsc=enabled              2>$null|Out-Null  # RSC (Receive Segment Coalescing): enabled
-    netsh int tcp set global chimney=disabled         2>$null|Out-Null  # TCP Chimney: disabled
-    netsh int tcp set global dca=enabled              2>$null|Out-Null  # DCA: enabled
-    netsh int tcp set global netdma=disabled          2>$null|Out-Null  # NetDMA: disabled
-    netsh int tcp set global heuristics=disabled      2>$null|Out-Null  # Scaling heuristics: disabled
-    netsh int tcp set global nonsackrttresiliency=disabled 2>$null|Out-Null  # NonSackRtt: disabled
-    netsh int tcp set global maxsynretransmissions=2  2>$null|Out-Null  # Max SYN retransmissions: 2
-    netsh int tcp set global initialRto=2000          2>$null|Out-Null  # Initial RTO: 2000ms
-    netsh int tcp set global minRto=300               2>$null|Out-Null  # Min RTO: 300ms
-
-    # ── Registro TCP/IP ───────────────────────────────────────────────────────
-    $tcpip = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
-    New-ItemProperty $tcpip -Name "TCPNoDelay"             -PropertyType DWord -Value 1     -Force -EA SilentlyContinue|Out-Null  # Nagle OFF
-    New-ItemProperty $tcpip -Name "TcpAckFrequency"        -PropertyType DWord -Value 1     -Force -EA SilentlyContinue|Out-Null  # ACK immediato
-    New-ItemProperty $tcpip -Name "TcpDelAckTicks"         -PropertyType DWord -Value 0     -Force -EA SilentlyContinue|Out-Null  # Delayed ACK ticks: 0
-    New-ItemProperty $tcpip -Name "IRPStackSize"           -PropertyType DWord -Value 32    -Force -EA SilentlyContinue|Out-Null
-    New-ItemProperty $tcpip -Name "GlobalMaxTcpWindowSize" -PropertyType DWord -Value 65535 -Force -EA SilentlyContinue|Out-Null
-    New-ItemProperty $tcpip -Name "TcpTimedWaitDelay"      -PropertyType DWord -Value 30    -Force -EA SilentlyContinue|Out-Null  # TIME_WAIT: 30s
-    New-ItemProperty $tcpip -Name "MaxUserPort"            -PropertyType DWord -Value 65534 -Force -EA SilentlyContinue|Out-Null  # Port range massimo
-    New-ItemProperty $tcpip -Name "MaxConnectionsPerServer"-PropertyType DWord -Value 20    -Force -EA SilentlyContinue|Out-Null  # Max connessioni server: 20
-    New-ItemProperty $tcpip -Name "MaxConnectionsPer1_0Server" -PropertyType DWord -Value 20 -Force -EA SilentlyContinue|Out-Null
-
-    # ── DNS lasciati al default / gestione utente ───────────────────────────
-
-    # ── Gaming Tweaks (NetworkThrottling + SystemResponsiveness) ─────────────
-    $mmsp = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile"
-    Set-ItemProperty $mmsp -Name "NetworkThrottlingIndex" -Value 0xFFFFFFFF -Type DWord -Force -EA SilentlyContinue  # Throttling: ffffffff
-    Set-ItemProperty $mmsp -Name "SystemResponsiveness"   -Value 0          -Type DWord -Force -EA SilentlyContinue  # Gaming: 0
-
-    # ── QoS ──────────────────────────────────────────────────────────────────
-    reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Psched" /v "NonBestEffortLimit" /t REG_DWORD /d 0 /f 2>$null|Out-Null  # QoS: 0% riservato
-    reg add "HKLM\SYSTEM\CurrentControlSet\Services\NetBT\Parameters" /v "EnableLMHOSTS" /t REG_DWORD /d 0 /f 2>$null|Out-Null
-
-    Write-Success "TCP/IP: RSC ON, NonSackRtt OFF, RTO 2000/300, ACK freq, MaxConn 20, QoS 0%, port 65534"
-
-    # ── WiFi ─────────────────────────────────────────────────────────────────
-    if($doNTWifi){
-        Write-Host ""
-        Write-Info "Ricerca adapter WiFi..."
-        $wifiAdapters = Get-NetAdapter -Physical | Where-Object{
-            $_.MediaType -like "*802.11*" -or
-            $_.InterfaceDescription -like "*Wi-Fi*" -or
-            $_.InterfaceDescription -like "*Wireless*" -or
-            $_.InterfaceDescription -like "*WLAN*"
-        }
-
-        if(-not $wifiAdapters){
-            Write-Warning "Nessun adapter WiFi trovato"
-        } else {
-            foreach($a in $wifiAdapters){
-                Write-Host "  → $($a.Name): $($a.InterfaceDescription)" -F DarkGray
-
-                # Power management OFF
-                $devID = $a.DeviceID
-                $regP  = "HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e972-e325-11ce-bfc1-08002be10318}\$devID"
-                if(Test-Path $regP){ Set-ItemProperty $regP -Name "PnPCapabilities" -Value 24 -Type DWord -Force -EA SilentlyContinue }
-
-                $props = @{
-                    "Power Saving Mode"           = "Maximum Performance"
-                    "MIMO Power Save Mode"         = "No SMPS"
-                    "Roaming Aggressiveness"       = "1. Lowest"
-                    "Transmit Power"               = "Highest"
-                    "802.11n Mode"                 = "Enabled"
-                    "802.11ac Mode"                = "Enabled"
-                    "802.11ax Mode"                = "Enabled"          # WiFi 6
-                    "Preferred Band"               = "Prefer 5GHz Band" # preferisce 5GHz
-                    "Fat Channel Intolerant"       = "Disabled"
-                    "Throughput Enhancement"       = "Disabled"
-                    "Throughput Booster"           = "Disabled"
-                    "U-APSD Support"               = "Disabled"         # riduce latenza gaming
-                    "WMM"                          = "Enabled"          # QoS WiFi
-                    "ARP Offload"                  = "Disabled"
-                    "NS Offload"                   = "Disabled"
-                    "GTK Rekeying for Security Association" = "Disabled"
-                    "Wake on Magic Packet"         = "Disabled"
-                    "Wake on Pattern Match"        = "Disabled"
-                    "Interrupt Moderation"         = "Disabled"
-                    "Receive Buffers"              = "256"
-                    "Transmit Buffers"             = "256"
-                }
-                foreach($prop in $props.GetEnumerator()){
-                    try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName $prop.Key -DisplayValue $prop.Value -EA SilentlyContinue }catch{}
-                }
-            }
-            Write-Success "WiFi: Power OFF, 5GHz, Roaming basso, U-APSD OFF, Wake OFF"
-        }
-    }
-
-    # ── LAN ──────────────────────────────────────────────────────────────────
-    if($doNTLan){
-        Write-Host ""
-        Write-Info "Ricerca adapter LAN/Ethernet..."
-        $lanAdapters = Get-NetAdapter -Physical | Where-Object{
-            $_.MediaType -like "*802.3*" -or
-            $_.InterfaceDescription -like "*Ethernet*" -or
-            $_.InterfaceDescription -like "*Gigabit*" -or
-            $_.InterfaceDescription -like "*Realtek*" -or
-            $_.InterfaceDescription -like "*Intel*" -or
-            $_.InterfaceDescription -like "*2.5G*" -or
-            $_.InterfaceDescription -like "*10GbE*"
-        }
-
-        if(-not $lanAdapters){
-            Write-Warning "Nessun adapter LAN trovato"
-        } else {
-            if(-not $cpuCount){ $cpuCount = (Get-CimInstance Win32_Processor -EA SilentlyContinue).NumberOfLogicalProcessors }
-            foreach($a in $lanAdapters){
-                Write-Host "  → $($a.Name): $($a.InterfaceDescription)" -F DarkGray
-
-                # Power management OFF
-                $devID = $a.DeviceID
-                $regP  = "HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e972-e325-11ce-bfc1-08002be10318}\$devID"
-                if(Test-Path $regP){ Set-ItemProperty $regP -Name "PnPCapabilities" -Value 24 -Type DWord -Force -EA SilentlyContinue }
-
-                $lanProps = @{
-                    "Energy Efficient Ethernet"      = "Disabled"
-                    "Advanced EEE"                   = "Disabled"
-                    "Green Ethernet"                 = "Disabled"
-                    "Ultra Low Power Mode"           = "Disabled"
-                    "Interrupt Moderation"           = "Disabled"     # latenza minima gaming
-                    "Interrupt Moderation Rate"      = "OFF"
-                    "Adaptive Inter-Frame Spacing"   = "Disabled"
-                    "Flow Control"                   = "Rx & Tx Enabled"
-                    "Large Send Offload V2 (IPv4)"   = "Disabled"
-                    "Large Send Offload V2 (IPv6)"   = "Disabled"
-                    "TCP Checksum Offload (IPv4)"    = "Rx & Tx Enabled"
-                    "TCP Checksum Offload (IPv6)"    = "Rx & Tx Enabled"
-                    "UDP Checksum Offload (IPv4)"    = "Rx & Tx Enabled"
-                    "UDP Checksum Offload (IPv6)"    = "Rx & Tx Enabled"
-                    "IP Checksum Offload"            = "Rx & Tx Enabled"
-                    "Receive Buffers"                = "2048"
-                    "Transmit Buffers"               = "2048"
-                    "Receive Side Scaling"           = "Enabled"
-                    "Wake on Magic Packet"           = "Disabled"
-                    "Wake on Pattern Match"          = "Disabled"
-                    "Jumbo Frame"                    = "9014"
-                    "Speed & Duplex"                 = "Auto Negotiation"
-                }
-                foreach($prop in $lanProps.GetEnumerator()){
-                    try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName $prop.Key -DisplayValue $prop.Value -EA SilentlyContinue }catch{}
-                }
-
-                # RSS su core 2-3 se 4+ core
-                if($cpuCount -ge 4){
-                    try{ Set-NetAdapterRSS -Name $a.Name -BaseProcessorNumber 2 -EA SilentlyContinue }catch{}
-                }
-            }
-            Write-Success "LAN: EEE OFF, Interrupt OFF, Jumbo 9K, RSS ON, Checksum ON, Buffer 2048"
-        }
-    }
-
-    # ── DNS lasciati all utente ───────────────────────────────────────────────
-    Write-Host ""
-    Write-Host "  🌐 DNS:" -F Cyan
-    Write-Host "  Nessuna modifica automatica ai DNS: da 8.0.10 li gestisci tu manualmente fuori dallo script.`n" -F DarkGray
-
-    Write-Host ""
-    Write-Host "  ════════════════════════════════════════════════════" -F Green
-    Write-Host "   ✓ NET TWEAKS COMPLETATI!" -F Green
-    Show-OgdAppliedSummary 'NETWORK'
-    Write-Host "  ════════════════════════════════════════════════════`n" -F Green
-    Write-Host "  ℹ Alcune proprietà richiedono il riavvio dell'adapter" -F DarkGray
-    Write-Host "  ℹ Per applicare tutto: disconnetti e riconnetti la rete`n" -F DarkGray
-
+    Write-Section "NETWORK"
+    Write-Host "`n  Le ottimizzazioni rete sono state rimosse dal progetto." -F Cyan
+    Write-Host "  WinCaffe NEXT non applica piu tweak WiFi, LAN, TCP/IP, QoS o profili scheda." -F White
+    Write-Host "  Per qualunque modifica di rete, procedi manualmente fuori dallo script.`n" -F DarkGray
     Read-Host "  INVIO per tornare al menu"
     continue MenuLoop
 }
@@ -7396,7 +7175,7 @@ if($mode -in @("1","2","3","A","a","4","5","B","b")){
         Write-Host "   ✓ Compatibilita 25H2 stabile + Insider Beta, senza debloat app e senza forcing low-level" -F Magenta
     }
     if($doLight){
-        Write-Host "   ✓ C-States + Timer + Piano + GPU + Rete base" -F White
+        Write-Host "   ✓ C-States + Timer + Piano + GPU (rete invariata)" -F White
     }
     if($doNormal){
         Write-Host "   ✓ Process 30+ + NPU + Debloat + Visual + Rete avanzata" -F White
@@ -7418,7 +7197,7 @@ if($mode -in @("1","2","3","A","a","4","5","B","b")){
     }
     if($isLaptop){
         $ltInc = switch($laptopLevel){
-            "L"{"Timer + Privacy + rete base + GPU + WiFi/LAN + AHCI"}
+            "L"{"Timer + Privacy + GPU + AHCI (rete invariata)"}
             "N"{"Light + Process + Debloat + Visual + Rete avanzata"}
                 "A"{"Normale + Piano Ultimate + MMCSS + tuning prudente"}
             "U"{"Alto + CPU Boost + Memory" + $(if($isGamingLaptop){" + GPU max + Game Mode"}else{""})}
@@ -7602,33 +7381,12 @@ while($true){
         
         $global:opts++;Write-Success "Timer: FPS mode v2.2 + Piano + Script Desktop"
         
-        # Privacy + Network
-        Write-Info "[3] Privacy + Network..."
+        # Privacy
+        Write-Info "[3] Privacy..."
         $tp="HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
         if(!(Test-Path $tp)){New-Item $tp -Force -EA SilentlyContinue|Out-Null}
         Set-ItemProperty $tp -Name "AllowTelemetry" -Value 0 -Type DWord -Force -EA SilentlyContinue
-        # TCP/IP base
-        netsh int tcp set global autotuninglevel=normal          2>$null|Out-Null
-        netsh int tcp set global congestionprovider=ctcp         2>$null|Out-Null
-        netsh int tcp set global ecncapability=disabled          2>$null|Out-Null
-        netsh int tcp set global timestamps=disabled             2>$null|Out-Null
-        netsh int tcp set global heuristics=disabled             2>$null|Out-Null
-        netsh int tcp set global rss=enabled                     2>$null|Out-Null
-        netsh int tcp set global rsc=enabled                     2>$null|Out-Null
-        netsh int tcp set global nonsackrttresiliency=disabled   2>$null|Out-Null
-        netsh int tcp set global maxsynretransmissions=2         2>$null|Out-Null
-        $tcpipL = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
-        New-ItemProperty $tcpipL -Name "TCPNoDelay"         -PropertyType DWord -Value 1     -Force -EA SilentlyContinue|Out-Null
-        New-ItemProperty $tcpipL -Name "TcpAckFrequency"    -PropertyType DWord -Value 1     -Force -EA SilentlyContinue|Out-Null
-        New-ItemProperty $tcpipL -Name "TcpDelAckTicks"     -PropertyType DWord -Value 0     -Force -EA SilentlyContinue|Out-Null
-        New-ItemProperty $tcpipL -Name "TcpTimedWaitDelay"  -PropertyType DWord -Value 30    -Force -EA SilentlyContinue|Out-Null
-        New-ItemProperty $tcpipL -Name "MaxUserPort"        -PropertyType DWord -Value 65534 -Force -EA SilentlyContinue|Out-Null
-        New-ItemProperty $tcpipL -Name "MaxConnectionsPerServer" -PropertyType DWord -Value 20 -Force -EA SilentlyContinue|Out-Null
-        $mmspL = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile"
-        Set-ItemProperty $mmspL -Name "NetworkThrottlingIndex" -Value 0xFFFFFFFF -Type DWord -Force -EA SilentlyContinue
-        Set-ItemProperty $mmspL -Name "SystemResponsiveness"   -Value 0          -Type DWord -Force -EA SilentlyContinue
-        reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Psched" /v "NonBestEffortLimit" /t REG_DWORD /d 0 /f 2>$null|Out-Null
-        $global:opts++;Write-Success "Privacy + Network: TCP ottimizzato, throttling OFF, QoS 0%"
+        $global:opts++;Write-Success "Privacy: telemetria base ridotta senza toccare la rete"
         
         # Explorer
         Write-Info "[4] Explorer Boost..."
@@ -7663,27 +7421,7 @@ while($true){
         powercfg /setactive $pg2 2>$null
         Write-Success "Wake timers: OFF"
 
-        # WiFi: ottimizzazione per tutti i PC
-        $wifiA = Get-NetAdapter -Physical | Where-Object{$_.MediaType -like "*802.11*" -or $_.InterfaceDescription -like "*Wi-Fi*" -or $_.InterfaceDescription -like "*Wireless*" -or $_.InterfaceDescription -like "*WLAN*"}
-        if($wifiA){
-            foreach($a in $wifiA){
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Power Saving Mode"      -DisplayValue "Maximum Performance" -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Roaming Aggressiveness" -DisplayValue "1. Lowest"           -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Transmit Power"         -DisplayValue "Highest"             -EA SilentlyContinue }catch{}
-            }
-            Write-Success "WiFi: profilo prudente applicato (power saving performance, roaming basso, transmit max)"
-        }
-
-        # LAN: ottimizzazione base per tutti i PC
-        $lanA = Get-NetAdapter -Physical | Where-Object{$_.MediaType -like "*802.3*" -or $_.InterfaceDescription -like "*Ethernet*" -or $_.InterfaceDescription -like "*Gigabit*" -or $_.InterfaceDescription -like "*Realtek*" -or $_.InterfaceDescription -like "*Intel*"}
-        if($lanA){
-            foreach($a in $lanA){
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Energy Efficient Ethernet" -DisplayValue "Disabled"        -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Green Ethernet"            -DisplayValue "Disabled"        -EA SilentlyContinue }catch{}
-            }
-            Write-Success "LAN: profilo prudente applicato (EEE OFF, Green Ethernet OFF)"
-        }
-
+        Write-Info "[LP-NET] Nessun tweak rete applicato: WiFi e LAN restano a gestione manuale utente"
         $global:opts++
     }
     
@@ -7955,57 +7693,7 @@ while($true){
         }
         Write-Success "Servizi background: priorità I/O minima (SysMain, WSearch, DiagTrack)"
 
-        # WiFi: ottimizzazione completa per tutti i PC
-        $wifiAN = Get-NetAdapter -Physical | Where-Object{$_.MediaType -like "*802.11*" -or $_.InterfaceDescription -like "*Wi-Fi*" -or $_.InterfaceDescription -like "*Wireless*" -or $_.InterfaceDescription -like "*WLAN*"}
-        if($wifiAN){
-            foreach($a in $wifiAN){
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Power Saving Mode"      -DisplayValue "Maximum Performance" -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Roaming Aggressiveness" -DisplayValue "1. Lowest"           -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Transmit Power"         -DisplayValue "Highest"             -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "802.11n Mode"           -DisplayValue "Enabled"             -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Preferred Band"         -DisplayValue "Prefer 5GHz Band"    -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "U-APSD Support"         -DisplayValue "Disabled"            -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "WMM"                    -DisplayValue "Enabled"             -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Interrupt Moderation"   -DisplayValue "Disabled"            -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Wake on Magic Packet"   -DisplayValue "Disabled"            -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Wake on Pattern Match"  -DisplayValue "Disabled"            -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "ARP Offload"            -DisplayValue "Disabled"            -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Fat Channel Intolerant" -DisplayValue "Disabled"            -EA SilentlyContinue }catch{}
-                $devID = $a.DeviceID
-                $regP  = "HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e972-e325-11ce-bfc1-08002be10318}\$devID"
-                if(Test-Path $regP){ Set-ItemProperty $regP -Name "PnPCapabilities" -Value 24 -Type DWord -Force -EA SilentlyContinue }
-            }
-            Write-Success "WiFi: Power max, 5GHz, Roaming basso, U-APSD OFF, WMM ON, Interrupt OFF"
-        }
-
-        # LAN: ottimizzazione completa per tutti i PC
-        $lanAN = Get-NetAdapter -Physical | Where-Object{$_.MediaType -like "*802.3*" -or $_.InterfaceDescription -like "*Ethernet*" -or $_.InterfaceDescription -like "*Gigabit*" -or $_.InterfaceDescription -like "*Realtek*" -or $_.InterfaceDescription -like "*Intel*"}
-        if($lanAN){
-            if(-not $cpuCountN){ $cpuCountN = (Get-CimInstance Win32_Processor -EA SilentlyContinue).NumberOfLogicalProcessors }
-            foreach($a in $lanAN){
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Energy Efficient Ethernet"    -DisplayValue "Disabled"        -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Advanced EEE"                 -DisplayValue "Disabled"        -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Green Ethernet"               -DisplayValue "Disabled"        -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Interrupt Moderation"         -DisplayValue "Disabled"        -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Flow Control"                 -DisplayValue "Rx & Tx Enabled" -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Large Send Offload V2 (IPv4)" -DisplayValue "Disabled"        -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Large Send Offload V2 (IPv6)" -DisplayValue "Disabled"        -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "TCP Checksum Offload (IPv4)"  -DisplayValue "Rx & Tx Enabled" -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "TCP Checksum Offload (IPv6)"  -DisplayValue "Rx & Tx Enabled" -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "UDP Checksum Offload (IPv4)"  -DisplayValue "Rx & Tx Enabled" -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Receive Buffers"              -DisplayValue "2048"            -EA SilentlyContinue }catch{ try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Receive Buffers" -DisplayValue "1024" -EA SilentlyContinue }catch{} }
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Transmit Buffers"             -DisplayValue "2048"            -EA SilentlyContinue }catch{ try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Transmit Buffers" -DisplayValue "512" -EA SilentlyContinue }catch{} }
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Receive Side Scaling"         -DisplayValue "Enabled"         -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Wake on Magic Packet"         -DisplayValue "Disabled"        -EA SilentlyContinue }catch{}
-                try{ Set-NetAdapterAdvancedProperty -Name $a.Name -DisplayName "Wake on Pattern Match"        -DisplayValue "Disabled"        -EA SilentlyContinue }catch{}
-                $devID = $a.DeviceID
-                $regP  = "HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e972-e325-11ce-bfc1-08002be10318}\$devID"
-                if(Test-Path $regP){ Set-ItemProperty $regP -Name "PnPCapabilities" -Value 24 -Type DWord -Force -EA SilentlyContinue }
-                if($cpuCountN -ge 4){ try{ Set-NetAdapterRSS -Name $a.Name -BaseProcessorNumber 2 -EA SilentlyContinue }catch{} }
-            }
-            Write-Success "LAN: EEE OFF, Interrupt OFF, LSO OFF, Checksum ON, Buffer 2048, RSS ON"
-        }
-
+        Write-Info "[LPG-NET] Nessun tweak rete applicato: WiFi e LAN restano a gestione manuale utente"
         $global:opts++
     }
     
@@ -8247,14 +7935,9 @@ while($true){
         $global:opts++;Write-Success "USB Selective Suspend: OFF lato power plan (senza toccare direttamente lo stack USB)"
         $aggStep++
 
-        # ── QoS BANDWIDTH RESERVE = 0% ──────────────────────────────────────
-        # Windows riserva per default il 20% della banda per QoS scheduler
-        # Impostando a 0 tutta la banda è disponibile per le applicazioni
-        Write-Info "[$aggStep] QoS Bandwidth Reserve = 0%..."
-        $qosPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Psched"
-        if(!(Test-Path $qosPath)){New-Item $qosPath -Force -EA SilentlyContinue|Out-Null}
-        Set-ItemProperty $qosPath -Name "NonBestEffortLimit" -Value 0 -Type DWord -Force -EA SilentlyContinue
-        $global:opts++;Write-Success "QoS Bandwidth Reserve: 0% (100% banda alle app)"
+        # ── RETE LASCIATA ALL UTENTE ─────────────────────────────────────────
+        Write-Info "[$aggStep] Rete: nessun tweak QoS o NIC applicato"
+        $global:opts++;Write-Success "Rete: lasciata invariata per scelta progettuale"
         $aggStep++
 
         # ── STORAGE: NVMe/SSD TWEAKS ─────────────────────────────────────────
@@ -8529,11 +8212,10 @@ while($true){
         Set-ItemProperty $ptpGN -Name "PowerThrottlingOff" -Value 0 -Type DWord -Force -EA SilentlyContinue
         Write-Success "Power Throttling: gestione nativa"
 
-        Write-Info "[GN4] Network throttling OFF + Responsiveness gaming..."
+        Write-Info "[GN4] Responsiveness gaming..."
         $mmspGN="HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile"
-        Set-ItemProperty $mmspGN -Name "NetworkThrottlingIndex" -Value 0xFFFFFFFF -Type DWord -Force -EA SilentlyContinue
         Set-ItemProperty $mmspGN -Name "SystemResponsiveness"   -Value 0          -Type DWord -Force -EA SilentlyContinue
-        Write-Success "Network throttling OFF, SystemResponsiveness 0"
+        Write-Success "SystemResponsiveness 0"
 
         Write-Info "[GN5] GPU HwScheduling + DirectX Flip Model..."
         $gdGN="HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers"
@@ -8897,10 +8579,9 @@ while($true){
             Set-ItemProperty "$mm\Pro Audio" -Name "Priority"     -Value 1  -Type DWord -Force -EA SilentlyContinue
             Write-Success "MMCSS: Games High, Pro Audio ottimizzato"
 
-            Write-Info "[A4] Network throttling OFF..."
-            Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Name "NetworkThrottlingIndex" -Value 0xFFFFFFFF -Type DWord -Force -EA SilentlyContinue
+            Write-Info "[A4] Responsiveness gaming..."
             Set-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Name "SystemResponsiveness"   -Value 3        -Type DWord -Force -EA SilentlyContinue
-            Write-Success "Network: Throttling OFF, Responsiveness 3"
+            Write-Success "SystemResponsiveness 3"
 
             $global:opts++
         }
